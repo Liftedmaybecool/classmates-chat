@@ -86,7 +86,6 @@ const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } }); // 
 app.use('/uploads', express.static(uploadsDir));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname)));
 
 // ── OpenRouter (primary AI — OpenAI-compatible) ────────────────────────────────
 const OPENROUTER_KEYS = [
