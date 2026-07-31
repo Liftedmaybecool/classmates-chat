@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express    = require('express');
 const cors       = require('cors');
-const Groq       = require('groq-sdk');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path       = require('path');
 const http       = require('http');
@@ -89,14 +88,42 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
 
-// ── Groq (primary AI) ─────────────────────────────────────────────────────────
-const groqClients = [
-  process.env.GROQ_API_KEY,
-  process.env.GROQ_API_KEY_2,
-].filter(Boolean).map(key => new Groq({ apiKey: key }));
+// ── OpenRouter (primary AI — OpenAI-compatible) ────────────────────────────────
+const OPENROUTER_KEYS = [
+  process.env.OPENROUTER_API_KEY,
+  process.env.OPENROUTER_API_KEY_2,
+].filter(Boolean);
 
-if (groqClients.length === 0) console.warn('⚠️  No GROQ_API_KEY found!');
-else console.log(`🤖 Groq: ${groqClients.length} API key(s) loaded`);
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free';
+
+if (OPENROUTER_KEYS.length === 0) console.warn('⚠️  No OPENROUTER_API_KEY found!');
+else console.log(`🤖 OpenRouter: ${OPENROUTER_KEYS.length} key(s) loaded — model: ${OPENROUTER_MODEL}`);
+
+async function callOpenRouter(messages, key) {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${key}`,
+      'Content-Type':  'application/json',
+      'HTTP-Referer':  'https://classmates-chat.app',
+      'X-Title':       'Classmates Chat',
+    },
+    body: JSON.stringify({
+      model:       OPENROUTER_MODEL,
+      messages,
+      max_tokens:  2048,
+      temperature: 0.7,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const error = new Error(err?.error?.message || `OpenRouter HTTP ${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
+  const data = await res.json();
+  return data.choices[0].message.content;
+}
 
 // ── Gemini (fallback AI) ───────────────────────────────────────────────────────
 let gemini = null;
@@ -108,45 +135,35 @@ if (process.env.GEMINI_API_KEY) {
   console.warn('⚠️  No GEMINI_API_KEY — fallback disabled');
 }
 
-// ── Smart AI caller: Groq first, Gemini if Groq fails ─────────────────────────
+// ── Smart AI caller: OpenRouter first, Gemini if that fails ───────────────────
 async function callAI(messages, systemPrompt) {
-  // Build the full messages array with system prompt
   const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
 
-  // Try each Groq key first
-  for (const client of groqClients) {
+  // Try each OpenRouter key
+  for (const key of OPENROUTER_KEYS) {
     try {
-      const res = await client.chat.completions.create({
-        model:       'llama-3.3-70b-versatile',
-        messages:    fullMessages,
-        max_tokens:  2048,
-        temperature: 0.7,
-      });
-      return res.choices[0].message.content;
+      const reply = await callOpenRouter(fullMessages, key);
+      return reply;
     } catch (err) {
-      const status = err?.status || err?.statusCode || err?.error?.status;
-      if (status === 429 || status === 401 || status === 503) {
-        console.warn(`⚠️  Groq failed (${status}), trying next…`);
+      const status = err?.status || 0;
+      if (status === 429 || status === 401 || status === 503 || status === 502) {
+        console.warn(`⚠️  OpenRouter key failed (${status}), trying next…`);
         continue;
       }
       throw err;
     }
   }
 
-  // All Groq keys failed — try Gemini
+  // All OpenRouter keys failed — try Gemini
   if (gemini) {
     console.log('🔄 Switching to Gemini fallback…');
     try {
-      // Convert messages to Gemini format
       const history = messages.slice(0, -1).map(m => ({
         role:  m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }],
       }));
       const lastMsg = messages[messages.length - 1]?.content || '';
-      const chat = gemini.startChat({
-        history,
-        systemInstruction: systemPrompt,
-      });
+      const chat = gemini.startChat({ history, systemInstruction: systemPrompt });
       const result = await chat.sendMessage(lastMsg);
       return result.response.text();
     } catch (gErr) {
@@ -155,21 +172,16 @@ async function callAI(messages, systemPrompt) {
     }
   }
 
-  throw new Error('All AI providers failed and no fallback available.');
+  throw new Error('All AI providers failed.');
 }
 
-// Separate lighter groqCreate for the topic-extraction mini-call (no fallback needed)
+// Mini call for topic extraction (OpenRouter, no fallback needed)
 async function groqMiniCreate(params) {
-  for (const client of groqClients) {
-    try {
-      return await client.chat.completions.create(params);
-    } catch (err) {
-      const status = err?.status || err?.statusCode;
-      if (status === 429 || status === 401) continue;
-      throw err;
-    }
-  }
-  return null; // silently skip wiki lookup if all keys busy
+  if (!OPENROUTER_KEYS.length) return null;
+  try {
+    const msgs = params.messages || [];
+    return { choices: [{ message: { content: await callOpenRouter(msgs, OPENROUTER_KEYS[0]) } }] };
+  } catch { return null; }
 }
 
 // ── Student roster ─────────────────────────────────────────────────────────────
@@ -241,6 +253,7 @@ function migrateStudentData(){
     if (s.status === undefined) { s.status = 'online'; updated = true; }
     if (s.lastLoginDate === undefined) { s.lastLoginDate = null; updated = true; }
     if (s.loginStreak === undefined) { s.loginStreak = 0; updated = true; }
+    if (s.powerups === undefined) { s.powerups = []; updated = true; }
   });
   if (updated) saveDB();
 }
@@ -261,6 +274,7 @@ function getProfile(name) {
       studyMinutes: row.studyMinutes || 0,
       lastLoginDate: row.lastLoginDate || null,
       loginStreak: row.loginStreak || 0,
+      powerups: row.powerups || [],
     };
   }
   return {
@@ -669,6 +683,24 @@ When a student shares a file and asks you to analyse it:
 
 Never refuse to help with legitimate school or learning questions. Always aim to be the most helpful tutor possible.`;
 
+// ── Power-Up system prompt injector ───────────────────────────────────────────
+function buildPowerupPrompt(activePowerup) {
+  const prompts = {
+    'note-cleaner':    '\n\n[ACTIVE POWER-UP: Messy Note Cleaner] You are now in Note Cleaner mode. When given an image of handwritten notes (or a description of one), transcribe ALL the text you can see or infer, clean it up, fix spelling errors, organise it into neat sections with clear headings and bullet points. Present it as a beautifully typed version of the notes.',
+    'cheat-sheet':     '\n\n[ACTIVE POWER-UP: Chapter Cheat-Sheet] You are now in Cheat-Sheet mode. Take any chapter, topic or text given and produce a concise, visual summary using: 📌 key terms, 🔑 main ideas, 💡 must-remember facts, and ✅ a 3-sentence summary at the end. Use emojis generously to make it easy to scan.',
+    'diagram-decoder': '\n\n[ACTIVE POWER-UP: Picture & Diagram Decoder] You are now in Diagram Decoder mode. When given any science diagram, history map, chart, or graph (or a description of one), explain every label, arrow, and region in simple language a 6th grader can understand. Use numbered steps and simple analogies.',
+    'math-guide':      '\n\n[ACTIVE POWER-UP: Math Step-by-Step Guide] You are now in Math Guide mode. NEVER just give the final answer. Instead, break down every math problem into numbered steps, explain WHY each step is done, give a helpful hint for the tricky parts, and end with a "Check your work" section. Use clear formatting.',
+    'lang-pal':        '\n\n[ACTIVE POWER-UP: Language Practice Pal] You are now a Language Practice Pal. Speak in a fun mix of English and beginner-level Spanish or French (ask which language they prefer first). Translate any text given, teach vocabulary in context, and gently correct their attempts in the chosen language. Keep it conversational and encouraging.',
+    'hw-buddy':        '\n\n[ACTIVE POWER-UP: Homework Calendar Buddy] You are now in Calendar Buddy mode. When given any assignment sheet, syllabus, or list of tasks, produce a clear day-by-day study checklist with ✅ checkboxes, prioritised by due date. Break large tasks into small 15-30 minute chunks. Format it like a clean planner.',
+    'brainstorm':      '\n\n[ACTIVE POWER-UP: Brainstorming Partner] You are now in Brainstorming Partner mode. When given a project prompt or topic, generate at least 8 creative, specific ideas for posters, presentations, or slides. For each idea give: a catchy title, 2-sentence description, and one visual suggestion. Be imaginative and enthusiastic!',
+    'friendly-critic': '\n\n[ACTIVE POWER-UP: Friendly Critic] You are now a Friendly Critic. When given an essay or piece of writing, ALWAYS start with 2-3 genuine compliments, then suggest exactly 3 specific improvements with examples of how to rewrite those parts. End with an encouraging closing message. Never be harsh — always be warm and constructive.',
+    'book-source':     '\n\n[ACTIVE POWER-UP: Book Source Helper] You are now in Source Builder mode. When given a book title, article name, website or any publication details, build a correctly formatted "Sources Used / Bibliography" entry in both MLA and APA format. Explain what each part of the citation means.',
+    'voice-summary':   '\n\n[ACTIVE POWER-UP: Voice Note Summarizer] You are now in Lesson Summarizer mode. When given a transcript, description, or notes from a teacher\'s lesson, extract exactly 5 key takeaways, formatted as: 🎯 Takeaway 1, 🎯 Takeaway 2, etc. Then add a "What to study" section with 3 suggested review questions.',
+    'oops-fixer':      '\n\n[ACTIVE POWER-UP: Oops! Fixer Log 👑 LEGENDARY] You are now the legendary Oops! Fixer. When given a graded test or exam (photo or description), do ALL of the following: 1) List every incorrect answer and explain the CORRECT answer clearly. 2) Explain WHY the mistake likely happened. 3) Generate 3 custom practice questions for each mistake. 4) Create a personalised "weak spots" summary. This is the ultimate study recovery tool.',
+  };
+  return prompts[activePowerup] || '';
+}
+
 // ── Socket.io ──────────────────────────────────────────────────────────────────
 const connectedUsers = {}; // { socketId: { name, socketId } }
 
@@ -739,7 +771,7 @@ io.on('connection', (socket) => {
   });
 
   // ── AI chat (private per student) ─────────────────────────────────────────
-  socket.on('aiMessage', async ({ text, attachment }) => {
+  socket.on('aiMessage', async ({ text, attachment, activePowerup }) => {
     const name = socket.data.name;
     if (!name || (!text && !attachment)) return;
 
@@ -875,7 +907,7 @@ io.on('connection', (socket) => {
         messagesWithContext[messagesWithContext.length - 1].content += wikiContext;
       }
 
-      const reply = await callAI(messagesWithContext, AI_SYSTEM_PROMPT);
+      const reply = await callAI(messagesWithContext, AI_SYSTEM_PROMPT + buildPowerupPrompt(activePowerup));
       saveAIHistory(name, 'assistant', reply);
 
       const aiMsg = {
@@ -1229,7 +1261,61 @@ io.on('connection', (socket) => {
     io.emit('profileUpdated', { name: from, profile: updatedSender });
   });
 
-  // ── Video call signalling (WebRTC) ────────────────────────────────────────
+  // ── AI Power-Ups ──────────────────────────────────────────────────────────
+  socket.on('buyPowerup', ({ id, cost }) => {
+    const name = socket.data.name;
+    if (!name) return;
+    const row = dbState.students.find(s => s.name === name);
+    if (!row) return;
+
+    const POWERUPS = {
+      'note-cleaner':   { name: 'Messy Note Cleaner',       cost: 1500  },
+      'cheat-sheet':    { name: 'Chapter Cheat-Sheet',       cost: 3500  },
+      'diagram-decoder':{ name: 'Picture & Diagram Decoder', cost: 4000  },
+      'math-guide':     { name: 'Math Step-by-Step Guide',   cost: 6500  },
+      'lang-pal':       { name: 'Language Practice Pal',     cost: 2500  },
+      'hw-buddy':       { name: 'Homework Calendar Buddy',   cost: 3000  },
+      'brainstorm':     { name: 'Brainstorming Partner',     cost: 4500  },
+      'friendly-critic':{ name: 'Friendly Critic',           cost: 5000  },
+      'book-source':    { name: 'Book Source Helper',        cost: 1000  },
+      'voice-summary':  { name: 'Voice Note Summarizer',     cost: 5500  },
+      'oops-fixer':     { name: 'Oops! Fixer Log',           cost: 10000 },
+    };
+
+    const pu = POWERUPS[id];
+    if (!pu) { socket.emit('powerupError', '❌ Unknown power-up.'); return; }
+
+    if (!row.powerups) row.powerups = [];
+    if (row.powerups.includes(id)) {
+      socket.emit('powerupError', `✅ You already own ${pu.name}!`); return;
+    }
+
+    const bal = row.class_coins || 0;
+    if (bal < pu.cost) {
+      socket.emit('powerupError', `❌ Insufficient funds! You need ${(pu.cost - bal).toLocaleString()} more 🪙 for ${pu.name}.`);
+      return;
+    }
+
+    row.class_coins = bal - pu.cost;
+    row.coins = row.class_coins;
+    row.powerups.push(id);
+    saveDB();
+
+    console.log(`⚡ ${name} purchased power-up: ${pu.name}`);
+    socket.emit('powerupPurchased', {
+      id, name: pu.name,
+      newBalance: row.class_coins,
+      powerups: row.powerups,
+    });
+    io.emit('profileUpdated', { name, profile: getProfile(name) });
+  });
+
+  socket.on('getPowerups', () => {
+    const name = socket.data.name;
+    if (!name) return;
+    const row = dbState.students.find(s => s.name === name);
+    socket.emit('powerupsList', row?.powerups || []);
+  });
   socket.on('callUser', ({ to, offer, from }) => {
     Object.entries(connectedUsers).forEach(([sid, u]) => {
       if (u.name === to) io.to(sid).emit('incomingCall', { from, offer, socketId: socket.id });
