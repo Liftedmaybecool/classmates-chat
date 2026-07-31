@@ -24,6 +24,10 @@ let dbState = {
   homework: [],
   homework_comments: [],
   homework_submissions: [],
+  polls: [],
+  poll_votes: [],
+  reports: [],
+  announcements: [],
 };
 
 function saveDB(){
@@ -54,6 +58,10 @@ function loadDB(){
   dbState.homework = dbState.homework || [];
   dbState.homework_comments = dbState.homework_comments || [];
   dbState.homework_submissions = dbState.homework_submissions || [];
+  dbState.polls = dbState.polls || [];
+  dbState.poll_votes = dbState.poll_votes || [];
+  dbState.reports = dbState.reports || [];
+  dbState.announcements = dbState.announcements || [];
 }
 
 loadDB();
@@ -210,6 +218,8 @@ function autoSeedStudents(){
       tier: null,
       premiumSince: null,
       studyMinutes: 0,
+      lastLoginDate: null,
+      loginStreak: 0,
     });
   }
   saveDB();
@@ -229,6 +239,8 @@ function migrateStudentData(){
     if (s.premiumSince === undefined) { s.premiumSince = null; updated = true; }
     if (s.studyMinutes === undefined) { s.studyMinutes = 0; updated = true; }
     if (s.status === undefined) { s.status = 'online'; updated = true; }
+    if (s.lastLoginDate === undefined) { s.lastLoginDate = null; updated = true; }
+    if (s.loginStreak === undefined) { s.loginStreak = 0; updated = true; }
   });
   if (updated) saveDB();
 }
@@ -247,6 +259,8 @@ function getProfile(name) {
       tier: row.tier || null,
       premiumSince: row.premiumSince || null,
       studyMinutes: row.studyMinutes || 0,
+      lastLoginDate: row.lastLoginDate || null,
+      loginStreak: row.loginStreak || 0,
     };
   }
   return {
@@ -305,8 +319,22 @@ function storeMessage(msg){
     replyTo: msg.replyTo || null,
     attachment: msg.attachment || null,
     timestamp: msg.timestamp,
+    reactions: msg.reactions || {},
   });
   saveDB();
+}
+
+function updateMessageReaction(channel, messageId, emoji, userName){
+  const target = dbState.messages.find(m => m.id === messageId && m.channel === channel);
+  if (!target) return null;
+  const reactions = target.reactions || {};
+  const users = reactions[emoji] || [];
+  const idx = users.indexOf(userName);
+  if (idx >= 0) users.splice(idx, 1); else users.push(userName);
+  reactions[emoji] = users;
+  target.reactions = reactions;
+  saveDB();
+  return target;
 }
 
 function getGeneralHistory(limit = 100){
@@ -373,11 +401,161 @@ function getHomeworkList(){
 }
 
 // ── Study session tracker ──────────────────────────────────────────────────────
-// studySessions[name] = { startTime, intervalId }
 const studySessions = {};
 
 const COINS_PER_30MIN  = 100;
 const STUDY_INTERVAL_MS = 30 * 60 * 1000;
+const ADMIN = '✨ Petnan Fwangkwal'; // only admin can post announcements, grade, manage
+
+// ── Rate limiter (max 5 msgs / 5 seconds per user) ───────────────────────────
+const msgTimestamps = {}; // { name: [timestamps] }
+function isRateLimited(name) {
+  const now = Date.now();
+  if (!msgTimestamps[name]) msgTimestamps[name] = [];
+  msgTimestamps[name] = msgTimestamps[name].filter(t => now - t < 5000);
+  if (msgTimestamps[name].length >= 5) return true;
+  msgTimestamps[name].push(now);
+  return false;
+}
+
+// ── Daily login bonus ──────────────────────────────────────────────────────────
+const DAILY_BONUS = 10;
+function checkDailyBonus(name) {
+  const row = dbState.students.find(s => s.name === name);
+  if (!row) return null;
+  const today = new Date().toDateString();
+  if (row.lastLoginDate === today) return null; // already claimed today
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  const streak = row.lastLoginDate === yesterday ? (row.loginStreak || 0) + 1 : 1;
+  row.lastLoginDate = today;
+  row.loginStreak = streak;
+  const bonus = DAILY_BONUS + (streak >= 7 ? 20 : streak >= 3 ? 10 : 0); // streak bonus
+  row.class_coins = (row.class_coins || 0) + bonus;
+  row.coins = (row.coins || 0) + bonus;
+  saveDB();
+  return { bonus, streak, total: row.class_coins };
+}
+
+// ── Leaderboard ────────────────────────────────────────────────────────────────
+function getLeaderboard() {
+  return dbState.students
+    .map(s => ({
+      name: s.name,
+      coins: s.class_coins || 0,
+      studyMinutes: s.studyMinutes || 0,
+      tier: s.tier || null,
+      streak: s.loginStreak || 0,
+    }))
+    .sort((a, b) => b.coins - a.coins)
+    .slice(0, 23);
+}
+
+// ── Message edit/delete ────────────────────────────────────────────────────────
+function editMessage(messageId, newText, requester) {
+  const msg = dbState.messages.find(m => m.id === messageId);
+  if (!msg) return null;
+  if (msg.sender !== requester && requester !== ADMIN) return null;
+  msg.text = newText;
+  msg.edited = true;
+  msg.editedAt = new Date().toISOString();
+  saveDB();
+  return msg;
+}
+
+function deleteMessage(messageId, requester) {
+  const msg = dbState.messages.find(m => m.id === messageId);
+  if (!msg) return null;
+  if (msg.sender !== requester && requester !== ADMIN) return null;
+  msg.deleted = true;
+  msg.text = null;
+  msg.attachment = null;
+  saveDB();
+  return msg;
+}
+
+// ── Read receipts ──────────────────────────────────────────────────────────────
+const readReceipts = {}; // { 'msgId': Set(names) }
+function markRead(messageId, name) {
+  if (!readReceipts[messageId]) readReceipts[messageId] = new Set();
+  readReceipts[messageId].add(name);
+}
+function getReaders(messageId) {
+  return readReceipts[messageId] ? [...readReceipts[messageId]] : [];
+}
+
+// ── Polls ──────────────────────────────────────────────────────────────────────
+function createPoll(question, options, creator, channel, groupId) {
+  const poll = {
+    id: uuidv4(),
+    question, options: options.map(o => ({ text: o, votes: [] })),
+    creator, channel, groupId: groupId || null,
+    timestamp: new Date().toISOString(),
+    closed: false,
+  };
+  dbState.polls.push(poll);
+  saveDB();
+  return poll;
+}
+
+function votePoll(pollId, optionIndex, voter) {
+  const poll = dbState.polls.find(p => p.id === pollId);
+  if (!poll || poll.closed) return null;
+  // remove previous vote by same user
+  poll.options.forEach(o => { o.votes = o.votes.filter(v => v !== voter); });
+  if (poll.options[optionIndex]) poll.options[optionIndex].votes.push(voter);
+  saveDB();
+  return poll;
+}
+
+// ── Reports ────────────────────────────────────────────────────────────────────
+function fileReport(reportedBy, messageId, reason, messageText, messageSender) {
+  const report = {
+    id: uuidv4(),
+    reportedBy, messageId, reason,
+    messageText: messageText || '', messageSender: messageSender || '',
+    timestamp: new Date().toISOString(),
+    resolved: false,
+  };
+  dbState.reports.push(report);
+  saveDB();
+  return report;
+}
+
+// ── Announcements ──────────────────────────────────────────────────────────────
+function postAnnouncement(text, postedBy) {
+  const ann = { id: uuidv4(), text, postedBy, timestamp: new Date().toISOString() };
+  dbState.announcements.push(ann);
+  if (dbState.announcements.length > 50) dbState.announcements.shift();
+  saveDB();
+  return ann;
+}
+
+// ── Homework grading ───────────────────────────────────────────────────────────
+function gradeSubmission(hwId, studentName, grade, feedback, gradedBy) {
+  if (gradedBy !== ADMIN) return null;
+  const sub = dbState.homework_submissions.find(
+    s => s.hwId === hwId && s.sender === studentName
+  );
+  if (!sub) return null;
+  sub.grade = grade;
+  sub.feedback = feedback || '';
+  sub.gradedBy = gradedBy;
+  sub.gradedAt = new Date().toISOString();
+  saveDB();
+  return sub;
+}
+
+// ── Quiz coin award ────────────────────────────────────────────────────────────
+function awardQuizCoins(name, correct, total) {
+  const reward = correct * 5; // 5 coins per correct answer
+  if (reward <= 0) return 0;
+  const row = dbState.students.find(s => s.name === name);
+  if (!row) return 0;
+  row.class_coins = (row.class_coins || 0) + reward;
+  row.coins = (row.coins || 0) + reward;
+  saveDB();
+  return reward;
+}
 
 // ── Tier costs ────────────────────────────────────────────────────────────────
 const TIERS = {
@@ -518,10 +696,19 @@ io.on('connection', (socket) => {
       groups: Object.values(groupRooms).filter(g => g.members.includes(name)),
       coins:   profile.coins,
       premium: profile.premium,
+      isAdmin: name === ADMIN,
     });
 
-    socket.emit('generalHistory',  getGeneralHistory(100));
-    socket.emit('homeworkList',    getHomeworkList());
+    socket.emit('generalHistory', getGeneralHistory(100));
+    socket.emit('homeworkList',   getHomeworkList());
+    socket.emit('announcements',  dbState.announcements.slice(-30).reverse());
+    socket.emit('leaderboard',    getLeaderboard());
+
+    // Daily login bonus
+    const bonus = checkDailyBonus(name);
+    if (bonus) {
+      setTimeout(() => socket.emit('dailyBonus', bonus), 800);
+    }
 
     broadcastOnlineUsers();
 
@@ -537,11 +724,15 @@ io.on('connection', (socket) => {
   socket.on('generalMessage', ({ text, replyTo, attachment }) => {
     const name = socket.data.name;
     if (!name || (!text && !attachment)) return;
+    if (isRateLimited(name)) {
+      socket.emit('rateLimited', { msg: '🛑 Slow down! Max 5 messages per 5 seconds.' });
+      return;
+    }
     const msg = {
       id: uuidv4(), sender: name, text: (text || '').trim(),
       channel: 'general', replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'student', premium: getProfile(name).premium,
-      attachment: attachment || null,
+      attachment: attachment || null, reactions: {},
     };
     storeMessage(msg);
     io.emit('generalMessage', msg);
@@ -720,6 +911,7 @@ io.on('connection', (socket) => {
       channel: 'dm', replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'dm', premium: getProfile(from).premium,
       attachment: attachment || null,
+      reactions: {},
     };
     storeMessage(msg);
     Object.entries(connectedUsers).forEach(([sid, u]) => {
@@ -770,6 +962,7 @@ io.on('connection', (socket) => {
       channel: 'group', replyTo: replyTo || null, groupId, timestamp: new Date().toISOString(),
       type: 'group', premium: getProfile(name).premium,
       attachment: attachment || null,
+      reactions: {},
     };
     storeMessage(msg);
     g.messages.push(msg);
@@ -1078,7 +1271,207 @@ io.on('connection', (socket) => {
     socket.emit('callChatMessage', msg);
   });
 
+  // ── Message Edit / Delete ─────────────────────────────────────────────────
+  socket.on('editMessage', ({ messageId, newText, channel, groupId }) => {
+    const name = socket.data.name;
+    if (!name || !newText) return;
+    const msg = editMessage(messageId, newText, name);
+    if (!msg) return;
+    if (channel === 'general') io.emit('messageEdited', { messageId, newText, editedAt: msg.editedAt });
+    else if (channel === 'dm') {
+      [msg.sender, msg.recipient].forEach(u => {
+        Object.entries(connectedUsers).forEach(([sid, cu]) => {
+          if (cu.name === u) io.to(sid).emit('messageEdited', { messageId, newText, editedAt: msg.editedAt });
+        });
+      });
+    } else if (channel === 'group') {
+      io.to(`group_${groupId}`).emit('messageEdited', { messageId, newText, editedAt: msg.editedAt });
+    }
+  });
+
+  socket.on('deleteMessage', ({ messageId, channel, groupId }) => {
+    const name = socket.data.name;
+    if (!name) return;
+    const msg = deleteMessage(messageId, name);
+    if (!msg) return;
+    if (channel === 'general') io.emit('messageDeleted', { messageId });
+    else if (channel === 'dm') {
+      [msg.sender, msg.recipient].forEach(u => {
+        Object.entries(connectedUsers).forEach(([sid, cu]) => {
+          if (cu.name === u) io.to(sid).emit('messageDeleted', { messageId });
+        });
+      });
+    } else if (channel === 'group') {
+      io.to(`group_${groupId}`).emit('messageDeleted', { messageId });
+    }
+  });
+
+  // ── Read Receipts ─────────────────────────────────────────────────────────
+  socket.on('markRead', ({ messageId }) => {
+    const name = socket.data.name;
+    if (!name) return;
+    markRead(messageId, name);
+    const msg = dbState.messages.find(m => m.id === messageId);
+    if (!msg) return;
+    // notify the sender
+    Object.entries(connectedUsers).forEach(([sid, u]) => {
+      if (u.name === msg.sender) io.to(sid).emit('readReceipt', { messageId, readBy: name });
+    });
+  });
+
+  // ── Polls ─────────────────────────────────────────────────────────────────
+  socket.on('createPoll', ({ question, options, channel, groupId }) => {
+    const name = socket.data.name;
+    if (!name || !question || !options || options.length < 2) return;
+    const poll = createPoll(question, options.slice(0, 6), name, channel, groupId);
+    if (channel === 'general') io.emit('pollCreated', poll);
+    else if (channel === 'group') io.to(`group_${groupId}`).emit('pollCreated', poll);
+    else socket.emit('pollCreated', poll);
+  });
+
+  socket.on('votePoll', ({ pollId, optionIndex }) => {
+    const name = socket.data.name;
+    if (!name) return;
+    const poll = votePoll(pollId, optionIndex, name);
+    if (!poll) return;
+    if (poll.channel === 'general') io.emit('pollUpdated', poll);
+    else if (poll.channel === 'group') io.to(`group_${poll.groupId}`).emit('pollUpdated', poll);
+  });
+
+  socket.on('closePoll', ({ pollId }) => {
+    const name = socket.data.name;
+    const poll = dbState.polls.find(p => p.id === pollId);
+    if (!poll || (poll.creator !== name && name !== ADMIN)) return;
+    poll.closed = true;
+    saveDB();
+    if (poll.channel === 'general') io.emit('pollUpdated', poll);
+    else if (poll.channel === 'group') io.to(`group_${poll.groupId}`).emit('pollUpdated', poll);
+  });
+
+  // ── Announcements (admin only) ────────────────────────────────────────────
+  socket.on('postAnnouncement', ({ text }) => {
+    const name = socket.data.name;
+    if (name !== ADMIN || !text) return;
+    const ann = postAnnouncement(text, name);
+    io.emit('newAnnouncement', ann);
+  });
+
+  // ── Report Message ────────────────────────────────────────────────────────
+  socket.on('reportMessage', ({ messageId, reason, messageText, messageSender }) => {
+    const name = socket.data.name;
+    if (!name || !messageId) return;
+    const report = fileReport(name, messageId, reason || 'No reason given', messageText, messageSender);
+    socket.emit('reportFiled', { ok: true, message: '✅ Report sent to Petnan.' });
+    // notify admin
+    Object.entries(connectedUsers).forEach(([sid, u]) => {
+      if (u.name === ADMIN) {
+        io.to(sid).emit('adminAlert', {
+          type: 'report',
+          message: `🚨 ${name} reported a message from ${messageSender}: "${(messageText||'').substring(0,60)}"`,
+          report,
+        });
+      }
+    });
+  });
+
+  // ── Homework Grading (admin only) ─────────────────────────────────────────
+  socket.on('gradeHomework', ({ hwId, studentName, grade, feedback }) => {
+    const name = socket.data.name;
+    if (name !== ADMIN) return;
+    const sub = gradeSubmission(hwId, studentName, grade, feedback, name);
+    if (!sub) return;
+    io.emit('homeworkGraded', { hwId, studentName, grade, feedback });
+    // notify the student
+    Object.entries(connectedUsers).forEach(([sid, u]) => {
+      if (u.name === studentName) {
+        io.to(sid).emit('myGrade', { hwId, grade, feedback, gradedBy: name });
+      }
+    });
+  });
+
+  // ── Quiz coin award ────────────────────────────────────────────────────────
+  socket.on('quizComplete', ({ correct, total }) => {
+    const name = socket.data.name;
+    if (!name) return;
+    const reward = awardQuizCoins(name, correct, total);
+    const p = getProfile(name);
+    socket.emit('quizReward', { reward, coins: p.coins, correct, total });
+    if (reward > 0) {
+      socket.emit('coinsEarned', { coins: reward, total: p.coins, reason: `Quiz: ${correct}/${total} correct!` });
+      io.emit('profileUpdated', { name, profile: p });
+    }
+  });
+
+  // ── Leaderboard ────────────────────────────────────────────────────────────
+  socket.on('getLeaderboard', () => {
+    socket.emit('leaderboard', getLeaderboard());
+  });
+
+  // ── Admin: get reports ─────────────────────────────────────────────────────
+  socket.on('getReports', () => {
+    const name = socket.data.name;
+    if (name !== ADMIN) return;
+    socket.emit('reportsList', dbState.reports.filter(r => !r.resolved).slice(-50).reverse());
+  });
+
+  socket.on('resolveReport', ({ reportId }) => {
+    const name = socket.data.name;
+    if (name !== ADMIN) return;
+    const r = dbState.reports.find(x => x.id === reportId);
+    if (r) { r.resolved = true; saveDB(); }
+    socket.emit('reportsList', dbState.reports.filter(x => !x.resolved).slice(-50).reverse());
+  });
+
+  // ── Admin: give/remove coins ───────────────────────────────────────────────
+  socket.on('adminGiveCoins', ({ studentName, amount }) => {
+    const name = socket.data.name;
+    if (name !== ADMIN) return;
+    const row = dbState.students.find(s => s.name === studentName);
+    if (!row) return;
+    row.class_coins = (row.class_coins || 0) + amount;
+    row.coins = (row.coins || 0) + amount;
+    saveDB();
+    const p = getProfile(studentName);
+    io.emit('profileUpdated', { name: studentName, profile: p });
+    socket.emit('adminActionDone', { message: `✅ Gave ${amount} coins to ${studentName}` });
+    Object.entries(connectedUsers).forEach(([sid, u]) => {
+      if (u.name === studentName) {
+        io.to(sid).emit('coinsEarned', { coins: amount, total: p.coins, reason: 'Admin gift 🎁' });
+      }
+    });
+  });
+
+  socket.on('adminResetPassword', ({ studentName, newPassword }) => {
+    const name = socket.data.name;
+    if (name !== ADMIN) return;
+    const row = dbState.students.find(s => s.name === studentName);
+    if (!row) return;
+    row.password = newPassword;
+    // also update STUDENTS array in memory
+    const s = STUDENTS.find(x => x.name === studentName);
+    if (s) s.password = newPassword;
+    saveDB();
+    socket.emit('adminActionDone', { message: `✅ Password for ${studentName} reset to "${newPassword}"` });
+  });
+
   // ── Typing indicators ─────────────────────────────────────────────────────
+  socket.on('toggleReaction', ({ channel, messageId, emoji }) => {
+    const name = socket.data.name;
+    if (!name || !emoji) return;
+    const target = updateMessageReaction(channel, messageId, emoji, name);
+    if (!target) return;
+    if (channel === 'general') io.emit('messageReactionUpdated', { channel, messageId, message: target });
+    else if (channel === 'dm') {
+      const sender = target.sender;
+      const recipient = target.recipient;
+      Object.entries(connectedUsers).forEach(([sid, u]) => {
+        if (u.name === sender || u.name === recipient) io.to(sid).emit('messageReactionUpdated', { channel, messageId, message: target });
+      });
+    } else if (channel === 'group') {
+      io.to(`group_${target.groupId}`).emit('messageReactionUpdated', { channel, messageId, message: target });
+    }
+  });
+
   socket.on('typing', ({ channel, to }) => {
     const name = socket.data.name;
     if (!name) return;
@@ -1155,6 +1548,20 @@ app.post('/api/upload-file', upload.single('file'), (req, res) => {
     size:     req.file.size,
     mimeType: mime,
   });
+});
+
+// ── REST: Leaderboard ──────────────────────────────────────────────────────────
+app.get('/api/leaderboard', (req, res) => res.json(getLeaderboard()));
+
+// ── REST: Admin panel ──────────────────────────────────────────────────────────
+app.get('/api/admin/reports', (req, res) => {
+  res.json(dbState.reports.filter(r => !r.resolved).slice(-50).reverse());
+});
+app.get('/api/admin/students', (req, res) => {
+  res.json(dbState.students.map(s => ({
+    name: s.name, coins: s.class_coins || 0, tier: s.tier, streak: s.loginStreak,
+    studyMinutes: s.studyMinutes, lastLogin: s.lastLoginDate,
+  })));
 });
 
 // ── Health ─────────────────────────────────────────────────────────────────────

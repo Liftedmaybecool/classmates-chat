@@ -58,7 +58,7 @@ function createWindow() {
     // Custom titlebar — the HTML handles the title bar UI
     titleBarStyle:   process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
     titleBarOverlay: process.platform !== 'darwin' ? {
-      color:       '#1e1f20',
+      color:       '#ff0000ff',
       symbolColor: '#8ab4f8',
       height:      36,
     } : false,

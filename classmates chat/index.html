@@ -360,6 +360,7 @@ input,textarea,select{font-family:inherit}
 /* Messages */
 .messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:0}
 .msg-row{display:flex;gap:9px;align-items:flex-start;padding:3px 4px;border-radius:10px;transition:background .12s}
+.msg-row[data-hidden="true"]{display:none!important}
 .msg-row:hover{background:rgba(0,245,255,.025)}
 .msg-row.own{flex-direction:row-reverse}
 .msg-row.sys-row{justify-content:center;padding:6px 0}
@@ -407,13 +408,21 @@ input,textarea,select{font-family:inherit}
   background:rgba(0,245,255,.04);border-radius:0 7px 7px 0;margin-bottom:5px;
 }
 .reply-snip strong{color:var(--neon-cyan)}
-.msg-acts{display:none;gap:3px;align-items:center;margin-top:4px}
+.msg-acts{display:none;gap:3px;align-items:center;margin-top:4px;flex-wrap:wrap}
 .msg-row:hover .msg-acts{display:flex}
 .act-btn{
   background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);
   border-radius:6px;color:var(--text2);padding:3px 8px;font-size:.68rem;transition:all .15s;
 }
 .act-btn:hover{background:rgba(0,245,255,.14);color:var(--neon-cyan);border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.15)}
+.reaction-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.reaction-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text2);font-size:.68rem;cursor:pointer;transition:all .15s}
+.reaction-pill:hover{transform:translateY(-1px);border-color:rgba(0,245,255,.2)}
+.reaction-pill.active{background:rgba(0,245,255,.14);color:var(--neon-cyan);border-color:rgba(0,245,255,.3)}
+.pinned-host{margin:0 0 8px;padding:10px 12px;border:1px solid rgba(251,191,36,.18);background:rgba(251,191,36,.08);border-radius:12px;color:var(--text2);font-size:.78rem}
+.pinned-host .pin-title{font-size:.68rem;color:var(--neon-yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:700}
+.tiny-search{width:150px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.14);border-radius:999px;color:var(--text);padding:6px 10px;font-size:.72rem;outline:none}
+.tiny-search:focus{border-color:var(--neon-cyan);box-shadow:0 0 10px rgba(0,245,255,.12)}
 .typing-bar{padding:2px 16px 5px;font-size:.7rem;color:var(--text3);min-height:20px}
 .tdots{display:inline-flex;gap:3px;margin-left:5px;vertical-align:middle}
 .tdots span{width:4px;height:4px;border-radius:50%;background:var(--neon-cyan);display:inline-block;animation:bounce .9s infinite;box-shadow:0 0 4px var(--neon-cyan)}
@@ -524,7 +533,46 @@ input,textarea,select{font-family:inherit}
 /* SECTIONS */
 .section{display:none;flex:1;flex-direction:column;overflow:hidden}
 .section.active{display:flex}
-/* MEMBERS PANEL */
+/* LOGIN / APP STATE */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:radial-gradient(circle at top left,rgba(0,245,255,.15),transparent 34%),radial-gradient(circle at bottom right,rgba(191,0,255,.18),transparent 30%),var(--bg);position:relative;overflow:hidden}
+.login-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 45%,rgba(0,245,255,.06));pointer-events:none}
+.login-shell{width:min(980px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center;position:relative;z-index:1}
+.login-hero{background:rgba(0,3,12,.72);border:1px solid rgba(0,245,255,.14);backdrop-filter:blur(16px);border-radius:24px;padding:24px 24px 22px;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.16);color:var(--neon-cyan);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.login-hero h1{font-size:clamp(1.35rem,2.5vw,2rem);font-weight:800;margin:12px 0 8px;color:var(--text)}
+.login-hero p{font-size:.92rem;color:var(--text2);line-height:1.65;margin-bottom:12px}
+.hero-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero-stats span{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:.77rem;color:var(--text2)}
+.login-card{background:rgba(7,10,24,.88);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.login-card h2{font-size:1.16rem;font-weight:800;margin-bottom:12px;color:var(--text)}
+.login-card .fg{margin-bottom:10px}
+.login-card .fg label{display:block;font-size:.76rem;font-weight:700;color:var(--neon-cyan);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.login-card select,.login-card input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text);padding:10px 11px;font-size:.9rem;outline:none;transition:all .2s}
+.login-card select:focus,.login-card input:focus{border-color:var(--neon-cyan);box-shadow:0 0 0 2px rgba(0,245,255,.1)}
+.login-btn{width:100%;border:none;border-radius:12px;padding:11px 14px;font-size:.95rem;font-weight:800;background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue));color:#04202f;box-shadow:0 0 18px rgba(0,245,255,.18);transition:all .2s}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(0,245,255,.24)}
+.login-btn.is-busy{opacity:.75;cursor:wait;transform:none}
+.forgot-btn{display:block;width:100%;margin-top:8px;background:transparent;border:none;color:var(--text3);font-size:.8rem;padding:8px 0}
+.forgot-btn:hover{color:var(--neon-cyan)}
+.login-footer{margin-top:12px;font-size:.72rem;color:var(--text3);text-align:center;line-height:1.5}
+.app-loading{position:fixed;inset:0;background:rgba(2,5,12,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:1200;transition:opacity .25s ease}
+.app-loading.hidden{opacity:0;pointer-events:none}
+.loading-card{background:rgba(7,10,24,.9);border:1px solid rgba(0,245,255,.2);border-radius:20px;padding:24px 28px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.loading-spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(0,245,255,.18);border-top-color:var(--neon-cyan);margin:0 auto 12px;animation:spin 1s linear infinite}
+.loading-card h3{font-size:1rem;font-weight:800;margin-bottom:6px}
+.loading-card p{font-size:.82rem;color:var(--text2);line-height:1.5}
+.conn-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);font-size:.74rem;font-weight:700;color:var(--text2)}
+.conn-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--neon-yellow);box-shadow:0 0 8px rgba(255,230,0,.35)}
+.conn-badge.connected{border-color:rgba(74,222,128,.2);color:var(--neon-green)}
+.conn-badge.connected .dot{background:var(--neon-green);box-shadow:0 0 8px rgba(74,222,128,.3)}
+.conn-badge.reconnecting,.conn-badge.disconnected{border-color:rgba(255,45,120,.2);color:var(--neon-pink)}
+.conn-badge.reconnecting .dot,.conn-badge.disconnected .dot{background:var(--neon-pink);box-shadow:0 0 8px rgba(255,45,120,.28)}
+.conn-banner{display:none;position:fixed;top:14px;right:16px;z-index:1100;padding:10px 13px;border-radius:12px;background:rgba(7,10,24,.92);border:1px solid rgba(255,45,120,.24);color:var(--neon-pink);font-size:.78rem;box-shadow:0 12px 32px rgba(0,0,0,.22)}
+.conn-banner.show{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:1100px){.login-shell{grid-template-columns:1fr;max-width:620px}.login-hero{text-align:center}.hero-stats{justify-content:center}}
+@media (max-width:860px){.app-body{flex-direction:column}.sidebar{width:100%;flex-direction:row;flex-wrap:wrap;justify-content:center;padding:8px 10px;border-right:none;border-bottom:1px solid rgba(0,245,255,.1)}.panel{width:100%;max-height:260px;border-right:none;border-bottom:1px solid rgba(0,245,255,.1)}.members-panel{display:none}.topbar{flex-wrap:wrap;gap:8px}.topbar-right{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}}
+@media (max-width:640px){.topbar{padding:10px 12px}.topbar-left{gap:6px}.tb-logo{font-size:.85rem}.tb-badge{display:none}.topbar-right{width:100%;justify-content:flex-end}.login-screen{padding:14px}.login-card,.login-hero{padding:18px}.login-hero h1{font-size:1.25rem}.messages{padding:10px 12px}.bubble{font-size:.8rem}.input-box{padding:7px 8px}.chat-hdr{padding:10px 12px;min-height:auto}.chat-hdr h2{font-size:.85rem}.msg-body{max-width:82%}}
 .members-panel{width:188px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .members-panel h4{font-size:.61rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:11px 11px 5px}
 .m-item{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;border-radius:7px;margin:0 3px;transition:background .15s}
@@ -712,42 +760,278 @@ input,textarea,select{font-family:inherit}
 /* TOAST */
 .toast{position:fixed;bottom:17px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid rgba(77,166,255,.3);border-radius:11px;padding:9px 17px;font-size:.82rem;color:var(--text);z-index:999;animation:fadeUp .3s ease;pointer-events:none;white-space:nowrap;max-width:90vw;white-space:normal;text-align:center}
 .toast.coin-toast{border-color:rgba(251,191,36,.4);color:var(--coin)}
+
+/* ── LEADERBOARD ── */
+.lb-item{display:flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:13px;padding:12px 16px;transition:all .2s;animation:fadeUp .3s ease}
+.lb-item:hover{border-color:rgba(0,245,255,.2);background:rgba(0,245,255,.04)}
+.lb-rank{font-size:1.3rem;width:34px;text-align:center;flex-shrink:0;font-weight:900}
+.lb-av{width:38px;height:38px;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;flex-shrink:0;overflow:hidden}
+.lb-av img{width:100%;height:100%;object-fit:cover}
+.lb-info{flex:1;min-width:0}
+.lb-name{font-size:.88rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-sub{font-size:.68rem;color:var(--text3);margin-top:1px}
+.lb-coins{font-size:.92rem;font-weight:800;color:var(--neon-yellow);text-shadow:0 0 6px rgba(255,230,0,.4);flex-shrink:0}
+/* ── ANNOUNCEMENTS ── */
+.ann-item{background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.15);border-radius:13px;padding:14px 16px;animation:fadeUp .3s ease;position:relative}
+.ann-item::before{content:'📢';position:absolute;top:12px;right:14px;font-size:1rem;opacity:.5}
+.ann-author{font-size:.7rem;color:var(--neon-cyan);font-weight:700;margin-bottom:4px;text-shadow:0 0 5px var(--neon-cyan)}
+.ann-text{font-size:.88rem;color:var(--text);line-height:1.6}
+.ann-time{font-size:.65rem;color:var(--text3);margin-top:5px}
+/* ── POLLS ── */
+.poll-wrap{background:rgba(191,0,255,.05);border:1px solid rgba(191,0,255,.2);border-radius:13px;padding:13px 15px;margin-top:6px}
+.poll-q{font-size:.86rem;font-weight:700;margin-bottom:10px;color:var(--neon-purple);text-shadow:0 0 6px rgba(191,0,255,.3)}
+.poll-opts{display:flex;flex-direction:column;gap:6px}
+.poll-opt-btn{display:flex;align-items:center;gap:9px;background:rgba(191,0,255,.06);border:1px solid rgba(191,0,255,.2);border-radius:9px;padding:8px 12px;cursor:pointer;transition:all .2s;text-align:left;width:100%}
+.poll-opt-btn:hover{background:rgba(191,0,255,.14);border-color:var(--neon-purple)}
+.poll-opt-btn.voted{border-color:var(--neon-cyan);background:rgba(0,245,255,.08)}
+.poll-bar{height:5px;background:rgba(191,0,255,.15);border-radius:5px;flex:1;overflow:hidden}
+.poll-bar-fill{height:100%;background:linear-gradient(90deg,var(--neon-purple),var(--neon-cyan));border-radius:5px;transition:width .5s ease}
+.poll-pct{font-size:.68rem;color:var(--text2);width:32px;text-align:right;flex-shrink:0}
+.poll-creator{font-size:.65rem;color:var(--text3);margin-top:7px}
+.poll-closed-badge{font-size:.62rem;background:rgba(255,45,120,.15);color:var(--neon-pink);border:1px solid rgba(255,45,120,.3);border-radius:6px;padding:2px 7px;margin-left:7px}
+/* ── DARK / LIGHT MODE ── */
+body.light-mode{
+  --bg:#f0f4f8;--bg2:#e8eef4;--bg3:#dde6ef;--bg4:#ccd8e4;--bg5:#bfcfde;
+  --text:#0d1f30;--text2:#2e5f7a;--text3:#5a8fa8;
+  --border:rgba(0,100,150,.12);--glass:rgba(0,100,150,.04);
+}
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;background:rgba(0,3,12,.95);border-top:1px solid rgba(0,245,255,.12);z-index:200;align-items:center;justify-content:space-around;padding:0 4px}
+@media(max-width:600px){
+  .mobile-nav{display:flex}
+  .app-body{padding-bottom:58px}
+  .sidebar{display:none}
+  .panel{width:180px}
+}
+.mn-btn{display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;border:none;color:var(--text3);padding:5px 8px;font-size:.58rem;transition:all .2s;flex:1}
+.mn-btn.active,.mn-btn:hover{color:var(--neon-cyan)}
+.mn-btn span:first-child{font-size:1.3rem}
+/* ── DARK MODE TOGGLE ── */
+.theme-toggle{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:8px;color:var(--text2);padding:4px 10px;font-size:.75rem;cursor:pointer;transition:all .2s}
+.theme-toggle:hover{background:rgba(255,255,255,.14)}
+/* ── REACTION PICKER ── */
+.reaction-picker{display:none;position:absolute;background:var(--bg3);border:1px solid rgba(0,245,255,.2);border-radius:12px;padding:6px 10px;z-index:300;flex-direction:row;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.4);bottom:100%;left:0}
+.reaction-picker.show{display:flex}
+.rp-btn{background:transparent;border:none;font-size:1.2rem;cursor:pointer;padding:2px 4px;border-radius:6px;transition:transform .15s}
+.rp-btn:hover{transform:scale(1.3)}
+.msg-reactions{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.rx-chip{display:inline-flex;align-items:center;gap:3px;background:rgba(0,245,255,.07);border:1px solid rgba(0,245,255,.15);border-radius:20px;padding:2px 8px;font-size:.73rem;cursor:pointer;transition:all .15s}
+.rx-chip:hover,.rx-chip.mine{background:rgba(0,245,255,.15);border-color:var(--neon-cyan)}
+/* ── READ RECEIPT ── */
+.read-tick{font-size:.6rem;color:var(--neon-cyan);margin-left:4px;opacity:.7}
+/* ── RATE LIMIT TOAST ── */
+.toast.rate-toast{border-color:rgba(255,45,120,.4);color:var(--neon-pink)}
+/* ── QUIZ ── */
+.quiz-q{font-size:.9rem;font-weight:700;margin-bottom:12px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.quiz-opt{background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.18);border-radius:9px;padding:10px 14px;cursor:pointer;font-size:.84rem;text-align:left;transition:all .2s}
+.quiz-opt:hover{background:rgba(0,245,255,.12);border-color:var(--neon-cyan)}
+.quiz-opt.correct{background:rgba(57,255,20,.1);border-color:var(--neon-green);color:var(--neon-green)}
+.quiz-opt.wrong{background:rgba(255,45,120,.1);border-color:var(--neon-pink);color:var(--neon-pink)}
+.quiz-score{text-align:center;padding:16px;font-size:1rem;font-weight:700}
+/* ── ADMIN PANEL ── */
+.admin-report{background:rgba(255,45,120,.06);border:1px solid rgba(255,45,120,.2);border-radius:10px;padding:10px 13px;font-size:.79rem}
+.admin-report p{color:var(--text2);margin-bottom:5px}
+.admin-report span{font-size:.65rem;color:var(--text3)}
+
+/* ══════════════════════════════════════════
+   AI WELCOME SCREEN — GEMINI-STYLE
+══════════════════════════════════════════ */
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.1)}66%{transform:translate(-20px,15px) scale(.95)}}
+@keyframes orbFloat2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-25px,20px) scale(1.05)}66%{transform:translate(15px,-25px) scale(.98)}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes chipIn{from{opacity:0;transform:translateY(12px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes sparkle{0%,100%{opacity:1;transform:scale(1) rotate(0)}50%{opacity:.7;transform:scale(1.2) rotate(180deg)}}
+@keyframes typing-dot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+.section#section-ai{flex-direction:column;overflow:hidden}
+
+/* Welcome screen */
+.ai-welcome-screen{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;padding:20px;
+  background:radial-gradient(ellipse at 50% 40%,rgba(139,92,246,.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 20% 80%,rgba(0,245,255,.05) 0%,transparent 50%),
+             radial-gradient(ellipse at 80% 20%,rgba(191,0,255,.06) 0%,transparent 50%),
+             var(--bg);
+}
+
+/* Animated background orbs */
+.ai-orb-wrap{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ai-orb{
+  position:absolute;border-radius:50%;filter:blur(80px);
+  width:400px;height:400px;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle,rgba(139,92,246,.15),transparent 70%);
+  animation:orbFloat 8s ease-in-out infinite;
+}
+.ai-orb2{
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(0,245,255,.1),transparent 70%);
+  animation:orbFloat2 10s ease-in-out infinite;
+  left:30%;top:30%;
+}
+.ai-orb3{
+  width:250px;height:250px;
+  background:radial-gradient(circle,rgba(255,45,120,.08),transparent 70%);
+  animation:orbFloat 12s ease-in-out infinite reverse;
+  left:70%;top:60%;
+}
+
+/* Greeting */
+.ai-greeting{
+  text-align:center;margin-bottom:32px;position:relative;z-index:1;
+  animation:fadeInUp .6s ease both;
+}
+.ai-greeting-icon{
+  font-size:2.2rem;display:block;margin:0 auto 16px;
+  background:linear-gradient(135deg,#a78bfa,#00f5ff,#a78bfa);
+  background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  animation:shimmer 3s linear infinite, sparkle 4s ease-in-out infinite;
+  font-style:normal;line-height:1;
+}
+.ai-greeting-text{
+  font-size:clamp(1.4rem,3vw,2rem);font-weight:700;
+  background:linear-gradient(135deg,var(--text),rgba(224,244,255,.7));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-.02em;
+}
+
+/* Suggestion chips */
+.ai-chips{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  max-width:620px;position:relative;z-index:1;margin-bottom:32px;
+  animation:fadeInUp .7s ease .1s both;
+}
+.ai-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;padding:9px 16px;font-size:.83rem;color:var(--text2);
+  cursor:pointer;transition:all .25s;backdrop-filter:blur(8px);
+  animation:chipIn .5s ease both;
+}
+.ai-chip:nth-child(1){animation-delay:.05s}
+.ai-chip:nth-child(2){animation-delay:.1s}
+.ai-chip:nth-child(3){animation-delay:.15s}
+.ai-chip:nth-child(4){animation-delay:.2s}
+.ai-chip:nth-child(5){animation-delay:.25s}
+.ai-chip:nth-child(6){animation-delay:.3s}
+.ai-chip:nth-child(7){animation-delay:.35s}
+.ai-chip:nth-child(8){animation-delay:.4s}
+.ai-chip:hover{
+  background:rgba(139,92,246,.15);
+  border-color:rgba(139,92,246,.4);color:var(--text);
+  transform:translateY(-2px);
+  box-shadow:0 4px 20px rgba(139,92,246,.2);
+}
+.ai-chip span{font-size:1rem}
+
+/* Centered input bar */
+.ai-center-input{
+  width:100%;max-width:640px;position:relative;z-index:1;
+  animation:fadeInUp .8s ease .2s both;
+}
+.ai-input-bar{
+  display:flex;align-items:flex-end;gap:10px;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:24px;padding:12px 14px;
+  transition:all .3s;backdrop-filter:blur(12px);
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
+}
+.ai-input-bar:focus-within{
+  border-color:rgba(139,92,246,.5);
+  box-shadow:0 0 0 3px rgba(139,92,246,.1),0 4px 24px rgba(0,0,0,.3);
+  background:rgba(255,255,255,.09);
+}
+.ai-attach-btn{
+  background:transparent;border:none;color:var(--text3);font-size:1.1rem;
+  padding:4px;flex-shrink:0;transition:all .2s;line-height:1;
+}
+.ai-attach-btn:hover{color:var(--neon-cyan);transform:scale(1.15)}
+.ai-textarea-center{
+  flex:1;background:transparent;border:none;color:var(--text);
+  font-size:.9rem;resize:none;outline:none;max-height:140px;
+  line-height:1.55;padding:2px 0;
+}
+.ai-textarea-center::placeholder{color:var(--text3)}
+.ai-send-center{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#7c3aed,#a78bfa);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .2s;
+  box-shadow:0 0 12px rgba(139,92,246,.4);
+}
+.ai-send-center:hover{transform:scale(1.1);box-shadow:0 0 20px rgba(139,92,246,.6)}
+.ai-send-center:disabled{opacity:.3;transform:none}
+
+/* Chat logo in header */
+.ai-chat-logo{
+  font-size:1.4rem;width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 14px rgba(139,92,246,.5);
+  -webkit-text-fill-color:transparent;background-clip:text;-webkit-background-clip:text;
+}
+
+/* AI thinking animation */
+#aiTypingBar{font-size:.78rem;color:rgba(167,139,250,.8);padding:4px 16px;min-height:22px}
+
 </style>
 </head>
 <body>
+<div id="appLoading" class="app-loading">
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+    <h3>Connecting to Classmates Chat</h3>
+    <p id="loadingText">Preparing your classroom space…</p>
+  </div>
+</div>
+<div id="connBanner" class="conn-banner"></div>
 
 <!-- ═══ LOGIN SCREEN ═══ -->
-<div id="loginScreen">
-  <div class="logo-row"><span class="logo-icon">🟢</span><span class="logo-text">CLASSMATES CHAT</span></div>
-  <div class="logo-sub">Classmates Communication Platform</div>
-  <div class="login-card">
-    <h2>Welcome back 👋  Sign in to continue</h2>
-    <div class="fg">
-      <label>Your Name</label>
-      <select id="nameSelect">
-        <option value="">— Choose your name —</option>
-        <option>Toni Macauly</option><option>Oghenetejiri Ogheneochukwu</option>
-        <option>Joanna Bogoro</option><option>Ama-Abasi Benson</option>
-        <option>Oluyemi Sosan</option><option>Aisha Adeniyi</option>
-        <option>Elissa Ojei</option><option>Kwame Sagoe</option>
-        <option>Oluwafeyikunmi Osunsedo</option><option>Olayomade King</option>
-        <option>Anthonia Celey Okogun</option><option>Netochi Anichebe</option>
-        <option>Ishaq Babalola</option><option>Eliora Ighodalo</option>
-        <option>Oluwanifesimi Thomas</option><option>Ereremena Orife</option>
-        <option>✨ Petnan Fwangkwal</option><option>Fareedah Ibrahim</option>
-        <option>Tamunomiebi Miebaga</option><option>Adedamola Egbonwon</option>
-        <option>Fievaoghene Atebe</option><option>Ethan Adeleke</option>
-        <option>Test Person</option>
-      </select>
+<div id="loginScreen" class="login-screen">
+  <div class="login-shell">
+    <div class="login-hero">
+      <div class="hero-pill">✨ Connected classroom</div>
+      <h1>Welcome back to your class hub</h1>
+      <p>Jump into general chat, private DMs, homework, coins, and AI help from one polished space.</p>
+      <div class="hero-stats">
+        <span>💬 Live chat</span>
+        <span>📚 Study help</span>
+        <span>🪙 Class coins</span>
+      </div>
     </div>
-    <div class="fg">
-      <label>Password</label>
-      <input type="password" id="passInput" placeholder="Enter your password"/>
+    <div class="login-card">
+      <h2>Sign in to continue</h2>
+      <div class="fg">
+        <label>Your Name</label>
+        <select id="nameSelect">
+          <option value="">— Choose your name —</option>
+          <option>Toni Macauly</option><option>Oghenetejiri Ogheneochukwu</option>
+          <option>Joanna Bogoro</option><option>Ama-Abasi Benson</option>
+          <option>Oluyemi Sosan</option><option>Aisha Adeniyi</option>
+          <option>Elissa Ojei</option><option>Kwame Sagoe</option>
+          <option>Oluwafeyikunmi Osunsedo</option><option>Olayomade King</option>
+          <option>Anthonia Celey Okogun</option><option>Netochi Anichebe</option>
+          <option>Ishaq Babalola</option><option>Eliora Ighodalo</option>
+          <option>Oluwanifesimi Thomas</option><option>Ereremena Orife</option>
+          <option>✨ Petnan Fwangkwal</option><option>Fareedah Ibrahim</option>
+          <option>Tamunomiebi Miebaga</option><option>Adedamola Egbonwon</option>
+          <option>Fievaoghene Atebe</option><option>Ethan Adeleke</option>
+          <option>Test Person</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input type="password" id="passInput" placeholder="Enter your password"/>
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <button id="loginBtn" class="login-btn" onclick="doLogin()">Sign In →</button>
+      <button class="forgot-btn" onclick="openForgot()">Forgot Password? Ask Petnan</button>
+      <div class="login-footer">🟢 Classmates Chat — Only for 5 Green students · Powered by Classmates AI</div>
     </div>
-    <div class="login-err" id="loginErr"></div>
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <button class="forgot-btn" onclick="openForgot()">Forgot Password? Ask Petnan</button>
-    <div class="login-footer">🟢 Classmates Chat — Only for 5 Green students · Powered by Classmates AI</div>
   </div>
 </div>
 
@@ -762,7 +1046,10 @@ input,textarea,select{font-family:inherit}
       <span class="pm-badge" id="pmBadge">⭐ PREMIUM</span>
     </div>
     <div class="topbar-right">
+      <div id="connBadge" class="conn-badge">● Connecting…</div>
+      <button id="installBtn" class="tb-btn" onclick="promptInstall()" style="display:none">📱 Install</button>
       <div class="coin-pill" id="coinPill" onclick="showSection('coins')" title="Your Class Coins">🪙 <span id="coinCount">0</span></div>
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
       <button class="tb-btn" onclick="showSection('settings')">⚙ Settings</button>
       <button class="tb-btn" onclick="doLogout()">Sign Out</button>
     </div>
@@ -779,6 +1066,9 @@ input,textarea,select{font-family:inherit}
       <div class="sb-div"></div>
       <div class="sw"><button class="sb-btn" id="sb-homework" onclick="showSection('homework')">📚</button><span class="tip">Homework & Study</span></div>
       <div class="sw"><button class="sb-btn" id="sb-coins" onclick="showSection('coins')">🪙</button><span class="tip">Class Coins</span></div>
+      <div class="sw"><button class="sb-btn" id="sb-leaderboard" onclick="showSection('leaderboard')">🏆</button><span class="tip">Leaderboard</span></div>
+      <div class="sw"><button class="sb-btn" id="sb-announce" onclick="showSection('announce')">📢</button><span class="tip">Announcements</span></div>
+      <div class="sw"><button class="sb-btn" id="sb-admin" onclick="showSection('admin')" style="display:none">🛡️</button><span class="tip">Admin Panel</span></div>
       <div class="sb-div"></div>
       <div class="sw"><button class="sb-btn" id="sb-settings" onclick="showSection('settings')">⚙️</button><span class="tip">Settings</span></div>
     </div>
@@ -853,7 +1143,8 @@ input,textarea,select{font-family:inherit}
         <div class="section active" id="section-general">
           <div class="chat-hdr">
             <div class="chat-hdr-l"><div><h2># general</h2><p id="genSub">All 22 students of 5 Green</p></div></div>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="generalSearch" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('generalMsgs', this.value)">
               <button class="hdr-btn" onclick="toggleMembers()">👥 Members</button>
             </div>
           </div>
@@ -868,7 +1159,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('genFile').click()" title="Attach file">📎</button>
               <input type="file" id="genFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'gen')"/>
               <textarea id="genInput" placeholder="Message #general…" rows="1"
-                onkeydown="handleKey(event,'gen')" oninput="autoGrow(this);emitTyping('general')"></textarea>
+                onkeydown="handleKey(event,'gen')" oninput="autoGrow(this);emitTyping('general');saveDraft('general', this.value)"></textarea>
               <button class="send-btn" onclick="sendGeneral()">➤</button>
             </div>
             <div class="file-preview-strip" id="genPreview" style="display:none"></div>
@@ -882,7 +1173,8 @@ input,textarea,select{font-family:inherit}
               <div id="dmHdrAv" class="msg-av" style="width:36px;height:36px"></div>
               <div><h2 id="dmHdrName">Select a classmate</h2><p id="dmHdrStatus"></p></div>
             </div>
-            <div style="display:flex;gap:6px" id="dmHdrBtns" style="display:none">
+            <div style="display:flex;gap:6px;align-items:center" id="dmHdrBtns" style="display:none">
+              <input id="dmSearch" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('dmMsgs', this.value)">
               <button class="hdr-btn" onclick="startCall(false)">📞 Call</button>
               <button class="hdr-btn" onclick="startCall(true)">🎥 Video Call</button>
             </div>
@@ -903,7 +1195,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('dmFile').click()" title="Attach file">📎</button>
               <input type="file" id="dmFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'dm')"/>
               <textarea id="dmInput" placeholder="Message…" rows="1"
-                onkeydown="handleKey(event,'dm')" oninput="autoGrow(this);emitTyping('dm')"></textarea>
+                onkeydown="handleKey(event,'dm')" oninput="autoGrow(this);emitTyping('dm');saveDraft('dm', this.value)"></textarea>
               <button class="send-btn" onclick="sendDM()">➤</button>
             </div>
             <div class="file-preview-strip" id="dmPreview" style="display:none"></div>
@@ -914,7 +1206,8 @@ input,textarea,select{font-family:inherit}
         <div class="section" id="section-groups">
           <div class="chat-hdr">
             <div class="chat-hdr-l"><div><h2 id="grpHdrName">Select a group</h2><p id="grpHdrSub"></p></div></div>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="groupSearchBox" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('groupMsgs', this.value)">
               <button class="hdr-btn" id="grpAddBtn" onclick="openAddMember()" style="display:none">➕ Add Member</button>
               <button class="hdr-btn" id="grpLeaveBtn" onclick="leaveGroup()" style="display:none">🚪 Leave</button>
             </div>
@@ -935,7 +1228,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('grpFile').click()" title="Attach file">📎</button>
               <input type="file" id="grpFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'grp')"/>
               <textarea id="grpInput" placeholder="Message group…" rows="1"
-                onkeydown="handleKey(event,'grp')" oninput="autoGrow(this);emitTyping('group')"></textarea>
+                onkeydown="handleKey(event,'grp')" oninput="autoGrow(this);emitTyping('group');saveDraft('groups', this.value)"></textarea>
               <button class="send-btn" onclick="sendGroup()">➤</button>
             </div>
             <div class="file-preview-strip" id="grpPreview" style="display:none"></div>
@@ -944,41 +1237,73 @@ input,textarea,select{font-family:inherit}
 
         <!-- AI -->
         <div class="section" id="section-ai">
-          <div class="chat-hdr">
-            <div class="chat-hdr-l">
-              <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);border:2px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 0 12px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
-              <div><h2>Classmates AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
+          <!-- AI WELCOME SCREEN (shown when no messages) -->
+          <div id="aiWelcomeScreen" class="ai-welcome-screen">
+            <!-- Animated background orb -->
+            <div class="ai-orb-wrap">
+              <div class="ai-orb"></div>
+              <div class="ai-orb ai-orb2"></div>
+              <div class="ai-orb ai-orb3"></div>
             </div>
-            <button class="hdr-btn" onclick="continueAI()">➡ Continue</button>
-            <button class="hdr-btn" onclick="openAIFavorites()">⭐ Favorites</button>
-            <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
+            <!-- Greeting -->
+            <div class="ai-greeting">
+              <div class="ai-greeting-icon">✦</div>
+              <h1 class="ai-greeting-text" id="aiGreetingText">What's your plan?</h1>
+            </div>
+            <!-- Floating suggestion chips -->
+            <div class="ai-chips">
+              <button class="ai-chip" onclick="aiQuick('Help me with my homework')"><span>📖</span> Homework help</button>
+              <button class="ai-chip" onclick="aiQuick('Quiz me on Mathematics!')"><span>🧠</span> Quiz me!</button>
+              <button class="ai-chip" onclick="aiQuick('Help me write an essay about climate change')"><span>✍️</span> Essay help</button>
+              <button class="ai-chip" onclick="aiQuick('Explain photosynthesis simply')"><span>🌱</span> Photosynthesis</button>
+              <button class="ai-chip" onclick="aiQuick('Solve step by step: 45 × 23')"><span>➗</span> Maths</button>
+              <button class="ai-chip" onclick="aiQuick('Tell me a fun science fact')"><span>🔬</span> Fun fact</button>
+              <button class="ai-chip" onclick="openModal('quizModal')"><span>🎯</span> Start quiz</button>
+              <button class="ai-chip" onclick="aiQuick('What happened in Nigerian history?')"><span>🌍</span> History</button>
+            </div>
+            <!-- Input bar (Gemini-style, centered) -->
+            <div class="ai-center-input">
+              <div class="ai-input-bar" id="aiInputBarCenter">
+                <button class="ai-attach-btn" onclick="document.getElementById('aiFile').click()" title="Attach file">📎</button>
+                <input type="file" id="aiFile" style="display:none" multiple
+                  accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.zip"
+                  onchange="previewFiles(this,'ai')"/>
+                <textarea id="aiInputCenter" class="ai-textarea-center"
+                  placeholder="Ask Classmates AI anything…" rows="1"
+                  oninput="syncAIInput(this)"
+                  onkeydown="handleAICenterKey(event)"></textarea>
+                <button class="ai-send-center" id="aiSendCenter" onclick="sendAIFromCenter()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+              <div class="file-preview-strip" id="aiPreview" style="display:none"></div>
+            </div>
           </div>
-          <div class="messages" id="aiMsgs">
-            <div id="aiWelcome" style="text-align:center;padding:36px 20px;color:var(--text3);max-width:480px;margin:0 auto">
-              <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;box-shadow:0 0 30px rgba(167,139,250,.5);border:3px solid rgba(167,139,250,.4)">🤖</div>
-              <h3 style="color:var(--purple);margin-bottom:7px;font-size:1.05rem">Hello! I'm Classmates AI</h3>
-              <p style="font-size:.82rem;line-height:1.7;color:var(--text2)">I know everything — maths, science, English, history, coding, and more. Ask me anything! Created by <strong style="color:var(--accent)">✨ Petnan Fwangkwal</strong>.</p>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px">
-                <button class="hdr-btn" onclick="aiQuick('Help me with my homework')">📖 Homework help</button>
-                <button class="hdr-btn" onclick="aiQuick('Quiz me on any subject!')">🧠 Quiz me!</button>
-                <button class="hdr-btn" onclick="aiQuick('Explain photosynthesis in simple terms')">🌱 Photosynthesis</button>
-                <button class="hdr-btn" onclick="aiQuick('Help me write an essay')">✍️ Essay help</button>
-                <button class="hdr-btn" onclick="aiQuick('Solve step by step: 45 × 23')">➗ Maths problem</button>
-                <button class="hdr-btn" onclick="aiQuick('Tell me a fun science fact')">🔬 Fun fact</button>
+
+          <!-- AI CHAT VIEW (shown after first message) -->
+          <div id="aiChatView" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+            <div class="chat-hdr">
+              <div class="chat-hdr-l">
+                <div class="ai-chat-logo">✦</div>
+                <div><h2>Classmates AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
+              </div>
+              <div style="display:flex;gap:6px;align-items:center">
+                <button class="hdr-btn" onclick="clearAIChat()">🗑 New chat</button>
               </div>
             </div>
-          </div>
-          <div class="typing-bar" id="aiTypingBar"></div>
-          <div class="input-wrap">
-            <div class="file-preview-strip" id="aiPreview" style="display:none"></div>
-            <div class="input-box">
-              <button class="attach-btn" onclick="document.getElementById('aiFile').click()" title="Attach image, video, PDF or file for AI analysis">📎</button>
-              <input type="file" id="aiFile" style="display:none" multiple
-                accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.zip"
-                onchange="previewFiles(this,'ai')"/>
-              <textarea id="aiInput" placeholder="Ask Classmates AI anything, or attach a file to analyse…" rows="1"
-                onkeydown="handleKey(event,'ai')" oninput="autoGrow(this)"></textarea>
-              <button class="send-btn" id="aiSendBtn" onclick="sendAI()">➤</button>
+            <div class="messages" id="aiMsgs"></div>
+            <div class="typing-bar" id="aiTypingBar"></div>
+            <div class="input-wrap">
+              <div class="file-preview-strip" id="aiPreviewChat" style="display:none"></div>
+              <div class="input-box">
+                <button class="attach-btn" onclick="document.getElementById('aiFileChat').click()" title="Attach file">📎</button>
+                <input type="file" id="aiFileChat" style="display:none" multiple
+                  accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.zip"
+                  onchange="previewFiles(this,'ai')"/>
+                <textarea id="aiInput" placeholder="Ask Classmates AI anything…" rows="1"
+                  onkeydown="handleKey(event,'ai')" oninput="autoGrow(this)"></textarea>
+                <button class="send-btn" id="aiSendBtn" onclick="sendAI()">➤</button>
+              </div>
             </div>
           </div>
         </div>
@@ -1011,7 +1336,7 @@ input,textarea,select{font-family:inherit}
                   accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv"
                   onchange="previewFilesStudy(this)"/>
                 <textarea id="studyInput" placeholder="Ask about any subject, or attach a file to analyse…" rows="1"
-                  onkeydown="handleKey(event,'study')" oninput="autoGrow(this)"></textarea>
+                  onkeydown="handleKey(event,'study')" oninput="autoGrow(this);saveDraft('study', this.value)"></textarea>
                 <button class="send-btn" id="studySendBtn" onclick="sendStudyAI()">➤</button>
               </div>
             </div>
@@ -1137,6 +1462,83 @@ input,textarea,select{font-family:inherit}
           </div>
         </div>
 
+        <!-- LEADERBOARD -->
+        <div class="section" id="section-leaderboard">
+          <div class="chat-hdr"><div class="chat-hdr-l"><div><h2>🏆 Leaderboard</h2><p>Top students by Class Coins</p></div></div>
+            <button class="hdr-btn" onclick="socket.emit('getLeaderboard')">🔄 Refresh</button>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:14px" id="leaderboardWrap">
+            <div id="leaderboardList" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="section" id="section-announce">
+          <div class="chat-hdr">
+            <div class="chat-hdr-l"><div><h2>📢 Announcements</h2><p>Important messages from Petnan</p></div></div>
+          </div>
+          <div style="flex:1;overflow-y:auto;padding:14px">
+            <div id="announceList" style="display:flex;flex-direction:column;gap:10px">
+              <div style="text-align:center;color:var(--text3);padding:30px;font-size:.83rem">No announcements yet.</div>
+            </div>
+          </div>
+          <div id="announceInput" class="input-wrap" style="display:none">
+            <div class="input-box">
+              <textarea id="announceText" placeholder="Write an announcement for the whole class…" rows="1" oninput="autoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();postAnnouncement()}"></textarea>
+              <button class="send-btn" onclick="postAnnouncement()">➤</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div class="section" id="section-admin">
+          <div class="chat-hdr"><div class="chat-hdr-l"><div><h2>🛡️ Admin Panel</h2><p>Only visible to ✨ Petnan Fwangkwal</p></div></div></div>
+          <div style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px">
+            <!-- Reports -->
+            <div class="s-sec">
+              <h3>🚨 Reports <button class="hdr-btn" style="margin-left:8px" onclick="socket.emit('getReports')">🔄 Load</button></h3>
+              <div id="adminReportsList" style="margin-top:9px;display:flex;flex-direction:column;gap:7px">
+                <div style="font-size:.77rem;color:var(--text3)">Click Load to see reports.</div>
+              </div>
+            </div>
+            <!-- Give Coins -->
+            <div class="s-sec">
+              <h3>🪙 Give Coins to Student</h3>
+              <div class="s-row" style="margin-top:9px">
+                <label>Student</label>
+                <select id="adminCoinStudent"><option value="">— Choose —</option></select>
+              </div>
+              <div class="s-row">
+                <label>Amount</label>
+                <input type="number" id="adminCoinAmt" placeholder="e.g. 500"/>
+              </div>
+              <div class="s-row"><label></label><button class="btn-primary" onclick="adminGiveCoins()">Give Coins</button></div>
+            </div>
+            <!-- Reset Password -->
+            <div class="s-sec">
+              <h3>🔑 Reset Student Password</h3>
+              <div class="s-row" style="margin-top:9px">
+                <label>Student</label>
+                <select id="adminPwStudent"><option value="">— Choose —</option></select>
+              </div>
+              <div class="s-row">
+                <label>New Password</label>
+                <input type="text" id="adminNewPw" placeholder="New password"/>
+              </div>
+              <div class="s-row"><label></label><button class="btn-primary" onclick="adminResetPw()">Reset Password</button></div>
+            </div>
+            <!-- Post Announcement -->
+            <div class="s-sec">
+              <h3>📢 Post Announcement</h3>
+              <div style="margin-top:9px">
+                <textarea id="adminAnnText" rows="3" placeholder="Write announcement…" style="width:100%;background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.18);border-radius:9px;color:var(--text);padding:9px;resize:none;outline:none;font-family:inherit;font-size:.85rem"></textarea>
+                <button class="btn-primary" style="width:100%;margin-top:8px" onclick="postAnnouncement()">📢 Post to All</button>
+              </div>
+            </div>
+            <div id="adminActionMsg" style="display:none;text-align:center;padding:9px;border-radius:9px;font-size:.82rem;font-weight:600;color:var(--neon-green);background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.2)"></div>
+          </div>
+        </div>
+
         <!-- SETTINGS -->
         <div class="section" id="section-settings">
           <div class="settings-wrap">
@@ -1183,7 +1585,20 @@ input,textarea,select{font-family:inherit}
 
     </div><!-- end inner flex -->
   </div><!-- end app-body -->
+
+  <!-- MOBILE BOTTOM NAV -->
+  <div class="mobile-nav" id="mobileNav">
+    <button class="mn-btn" id="mn-general" onclick="showSection('general')"><span>💬</span><span>Chat</span></button>
+    <button class="mn-btn" id="mn-dm" onclick="showSection('dm')"><span>✉️</span><span>DMs</span></button>
+    <button class="mn-btn" id="mn-ai" onclick="showSection('ai')"><span>🤖</span><span>AI</span></button>
+    <button class="mn-btn" id="mn-coins" onclick="showSection('coins')"><span>🪙</span><span>Coins</span></button>
+    <button class="mn-btn" id="mn-settings" onclick="showSection('settings')"><span>⚙️</span><span>More</span></button>
+  </div>
+
 </div><!-- end appScreen -->
+
+<!-- Notification sound (silent by default, enabled in settings) -->
+<audio id="notifSound" src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivsJBxXV2HqMu1knFZXIW0z7qTbFRgksbLuY9tV2Wn2NbEiXBhcs/p38B8aXiY5OjQno94e4vM4+uxin6Bj7zY3b2VhIWetNzbopiKkqe829GqkJCgsNvYx6+ek5ypvN3Srp2XprTR1sWzp6Gywdbau7GyuMvY2M/CubW8ydTW0ca9ur/M1NTNxL28ws3S0czEv7/EzNHQzMbCwsfNz87KxsTFyc3Oz83Jx8fJzM3OzcrJycvMzs3My8rLzM3Ozs3My8zNzs/Pzs3Mzc3Oz8/OzczNzs7Pz87Nzc7Oz8/PzsAAAA=" preload="auto"></audio>
 
 <!-- ═══ MODALS ═══ -->
 <!-- Forgot Password -->
@@ -1314,6 +1729,63 @@ input,textarea,select{font-family:inherit}
   </div>
 </div>
 
+<!-- DAILY BONUS POPUP -->
+<div class="modal-overlay" id="dailyBonusModal">
+  <div class="modal-box" style="max-width:340px;text-align:center">
+    <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite">🎁</div>
+    <div class="modal-title" style="text-align:center;font-size:1.1rem">Daily Login Bonus!</div>
+    <div style="font-size:3rem;font-weight:900;color:var(--neon-yellow);margin:10px 0;text-shadow:var(--glow-coin)" id="bonusAmount">+10 🪙</div>
+    <div style="font-size:.83rem;color:var(--text2);margin-bottom:5px" id="bonusStreak">Login streak: 1 day</div>
+    <div style="font-size:.75rem;color:var(--text3);margin-bottom:16px">Come back tomorrow for more coins! 7-day streak = +30 bonus 🔥</div>
+    <button class="btn-primary" onclick="closeModal('dailyBonusModal')" style="width:100%">Awesome! 🎉</button>
+  </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal-box" style="max-width:500px">
+    <div class="modal-title">🧠 AI Quiz Mode</div>
+    <div class="modal-sub">Answer questions and earn 5 🪙 per correct answer!</div>
+    <div id="quizContent">
+      <div style="margin-bottom:12px">
+        <label style="font-size:.75rem;color:var(--neon-cyan);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Subject</label>
+        <input type="text" id="quizSubject" placeholder="e.g. Mathematics, English, Biology…"/>
+      </div>
+      <div style="margin-bottom:12px">
+        <label style="font-size:.75rem;color:var(--neon-cyan);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px">Number of Questions</label>
+        <select id="quizCount" style="width:100%;background:rgba(0,245,255,.04);border:1px solid rgba(0,245,255,.18);border-radius:9px;color:var(--text);padding:9px;outline:none">
+          <option value="3">3 questions</option>
+          <option value="5" selected>5 questions</option>
+          <option value="10">10 questions</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" onclick="startQuiz()">🚀 Start Quiz</button>
+        <button class="btn-ghost" onclick="closeModal('quizModal')">Cancel</button>
+      </div>
+    </div>
+    <div id="quizQA" style="display:none"></div>
+  </div>
+</div>
+
+<!-- POLL MODAL -->
+<div class="modal-overlay" id="pollModal">
+  <div class="modal-box">
+    <div class="modal-title">📊 Create Poll</div>
+    <div class="modal-sub">Ask your classmates a question</div>
+    <input type="text" id="pollQuestion" placeholder="Your question…"/>
+    <div id="pollOptionsWrap">
+      <input type="text" class="poll-opt" placeholder="Option 1"/>
+      <input type="text" class="poll-opt" placeholder="Option 2"/>
+    </div>
+    <button class="btn-ghost" style="width:100%;margin-bottom:9px" onclick="addPollOption()">➕ Add Option</button>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="submitPoll()">Post Poll</button>
+      <button class="btn-ghost" onclick="closeModal('pollModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX (full-screen image viewer) -->
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -1384,6 +1856,11 @@ let groupFilter = '';
 let aiFavorites = [];
 let aiMessageTexts = {};
 let lastAIMessageId = null;
+let drafts = { general:'', dm:'', groups:'', ai:'', study:'' };
+let pinnedMessages = {};
+let deferredInstallPrompt = null;
+let unreadCount = 0;
+let notificationPermissionAsked = false;
 
 // ═══════════════════════════════════════
 // HELPERS
@@ -1457,12 +1934,95 @@ function continueAI(){
   sendAI();
 }
 
+function saveDraftState(){
+  localStorage.setItem('classmatesDrafts', JSON.stringify({ drafts, pinnedMessages }));
+}
+function loadDraftState(){
+  try{
+    const raw = JSON.parse(localStorage.getItem('classmatesDrafts') || '{}');
+    if(raw.drafts) drafts = { ...drafts, ...raw.drafts };
+    if(raw.pinnedMessages) pinnedMessages = raw.pinnedMessages;
+  } catch(e) {}
+}
+function saveDraft(channel, value){
+  drafts[channel] = value || '';
+  saveDraftState();
+}
+function restoreDrafts(){
+  const map = { general:'genInput', dm:'dmInput', groups:'grpInput', ai:'aiInput', study:'studyInput' };
+  Object.entries(map).forEach(([key, id])=>{
+    const el=document.getElementById(id);
+    if(el && drafts[key]){ el.value=drafts[key]; autoGrow(el); }
+  });
+}
+function filterMessages(containerId, query){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  const term=(query||'').trim().toLowerCase();
+  c.querySelectorAll('.msg-row').forEach(row=>{
+    const matches = !term || row.textContent.toLowerCase().includes(term);
+    row.dataset.hidden = matches ? 'false' : 'true';
+    row.style.display = matches ? '' : 'none';
+  });
+}
 function showToast(msg, type=''){
   const t=document.createElement('div');
   t.className='toast'+(type?' '+type:'');
   t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(()=>t.remove(),3200);
+}
+function bumpUnread(){
+  unreadCount += 1;
+  document.title = unreadCount > 0 ? `(${unreadCount}) Classmates Chat` : 'Classmates Chat';
+}
+function clearUnreadBadge(){
+  unreadCount = 0;
+  document.title = 'Classmates Chat';
+}
+function ensurePinnedHost(containerId){
+  const c=document.getElementById(containerId);
+  if(!c) return null;
+  let host = c.querySelector('.pinned-host');
+  if(!host){
+    host=document.createElement('div');
+    host.className='pinned-host';
+    c.prepend(host);
+  }
+  return host;
+}
+function renderPinnedBanner(containerId){
+  const host=ensurePinnedHost(containerId);
+  if(!host) return;
+  const key = containerId==='generalMsgs' ? 'general' : containerId==='dmMsgs' ? 'dm' : containerId==='groupMsgs' ? 'groups' : containerId==='aiMsgs' ? 'ai' : containerId==='studyMsgs' ? 'study' : null;
+  const pin = key ? pinnedMessages[key] : null;
+  if(!pin){ host.innerHTML=''; host.style.display='none'; return; }
+  host.style.display='block';
+  host.innerHTML=`<div class="pin-title">📌 Pinned message</div><div style="color:var(--text);font-weight:600">${esc(pin.sender)} · ${esc(pin.text||'Attachment')}</div><div style="font-size:.68rem;color:var(--text3);margin-top:3px">${fmt(pin.timestamp)}</div>`;
+}
+function togglePin(channel, id, sender, text, timestamp){
+  const key = channel==='gen' ? 'general' : channel==='dm' ? 'dm' : channel==='grp' ? 'groups' : channel==='ai' ? 'ai' : channel;
+  const current = pinnedMessages[key];
+  if(current && current.id===id){ delete pinnedMessages[key]; showToast('📌 Pinned message removed.'); }
+  else { pinnedMessages[key]={id,sender,text: text||'', timestamp}; showToast('📌 Message pinned.'); }
+  saveDraftState();
+  const containerId = channel==='gen' ? 'generalMsgs' : channel==='dm' ? 'dmMsgs' : channel==='grp' ? 'groupMsgs' : channel==='ai' ? 'aiMsgs' : 'studyMsgs';
+  renderPinnedBanner(containerId);
+}
+function requestNotifications(){
+  if(notificationPermissionAsked || !('Notification' in window)) return;
+  notificationPermissionAsked = true;
+  if(Notification.permission === 'granted') return;
+  if(Notification.permission !== 'denied') Notification.requestPermission().catch(()=>{});
+}
+function pushNotification(title, body){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  if(document.visibilityState === 'visible') return;
+  new Notification(title, { body, icon: '/icons/icon-192.svg' });
+}
+function promptInstall(){
+  if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); }
+  else { showToast('Install is available from your browser menu on mobile.'); }
 }
 
 function avatarEl(name, size='33px'){
@@ -1751,30 +2311,38 @@ function closeLightbox(){
 // ═══════════════════════════════════════
 // SECTION SWITCHING
 // ═══════════════════════════════════════
-const SECS = ['general','dm','groups','ai','homework','coins','settings'];
+const SECS = ['general','dm','groups','ai','homework','coins','leaderboard','announce','admin','settings'];
+let isAdmin = false;
+let lightMode = false;
+let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+
 function showSection(name){
   SECS.forEach(s=>{
     const sec=document.getElementById('section-'+s);
     const sb=document.getElementById('sb-'+s);
+    const mn=document.getElementById('mn-'+s);
     const pnl=document.getElementById('pnl-'+s);
     if(sec) sec.classList.toggle('active', s===name);
     if(sb)  sb.classList.toggle('active', s===name);
+    if(mn)  mn.classList.toggle('active', s===name);
     if(pnl) pnl.style.display= s===name?'':'none';
   });
-  // members panel only on general
   document.getElementById('membersPanel').style.display = name==='general'?'':'none';
-  // clear unread dot when visiting
   if(name==='dm'){ document.getElementById('sb-dm').classList.remove('has-unread'); }
   if(name==='groups'){ document.getElementById('sb-groups').classList.remove('has-unread'); }
-  // refresh coins section
   if(name==='coins'){
     refreshCoins();
-    // update transfer balance display
     const tb=document.getElementById('transferBal');
     if(tb) tb.textContent=(myProfile.coins||0).toLocaleString()+' 🪙';
   }
-  // refresh settings
   if(name==='settings') renderSettings();
+  if(name==='leaderboard') socket.emit('getLeaderboard');
+  if(name==='admin') populateAdminDropdowns();
+  if(name==='ai'){
+    const msgs=document.getElementById('aiMsgs');
+    if(!msgs || !msgs.children.length) showAIWelcomeScreen();
+    else showAIChatView();
+  }
 }
 
 function showHWTab(tab){
@@ -1800,6 +2368,8 @@ function buildMsg(msg, channel){
   const isSys = msg.type === 'system';
 
   const row = document.createElement('div');
+  row.dataset.msgId = msg.id;
+  row.setAttribute('data-msg-id', msg.id);
   if(isSys){
     row.className='msg-row sys-row';
     row.innerHTML=`<div class="bubble b-sys">${esc(msg.text)}</div>`;
@@ -1820,9 +2390,24 @@ function buildMsg(msg, channel){
       <button class="act-btn ai-fav-btn" data-ai-fav-id="${attr(msg.id)}" onclick="toggleAIFavorite('${attr(msg.id)}')">⭐ Save</button>
     </div>` : '';
 
+  const reactionButtons = ['👍','❤️','😂','🎉','🔥','🙏'];
+  const reactions = msg.reactions || {};
+  const reactionHTML = `
+    <div class="reaction-row">
+      ${reactionButtons.map(emoji => {
+        const users = reactions[emoji] || [];
+        const active = users.includes(ME);
+        return `<button class="reaction-pill${active ? ' active' : ''}" onclick="toggleReaction('${channel}','${attr(msg.id)}','${emoji}')">${emoji} ${users.length || ''}</button>`;
+      }).join('')}
+    </div>`;
+
   const actHTML = !isAI ? `
     <div class="msg-acts">
       <button class="act-btn" onclick="setReply('${channel}','${attr(msg.sender)}','${attr((msg.text||'').substring(0,60))}')">↩ Reply</button>
+      <button class="act-btn" onclick="togglePin('${channel}','${attr(msg.id)}','${attr(msg.sender)}','${attr((msg.text||'').substring(0,100))}','${attr(msg.timestamp)}')">📌 Pin</button>
+      ${isOwn||ME==='✨ Petnan Fwangkwal'?`<button class="act-btn" onclick="doEditMessage('${attr(msg.id)}','${channel}','${attr((msg.text||'').substring(0,200))}','${attr(msg.groupId||'')}')">✏️ Edit</button>`:''}
+      ${isOwn||ME==='✨ Petnan Fwangkwal'?`<button class="act-btn" style="color:var(--neon-pink)" onclick="doDeleteMessage('${attr(msg.id)}','${channel}','${attr(msg.groupId||'')}')">🗑 Delete</button>`:''}
+      ${!isOwn?`<button class="act-btn" style="color:var(--text3)" onclick="doReportMessage('${attr(msg.id)}','${attr((msg.text||'').substring(0,80))}','${attr(msg.sender)}')">🚩 Report</button>`:''}
     </div>` : favHTML;
 
   // Only show bubble if there is actual text content
@@ -1840,6 +2425,7 @@ function buildMsg(msg, channel){
     </div>
     ${replyHTML}
     ${bubbleHTML}
+    ${reactionHTML}
     ${actHTML}`;
 
   // Render attachment below the bubble
@@ -1858,6 +2444,7 @@ function appendMsg(containerId, msg, channel){
   const c=document.getElementById(containerId);
   if(!c) return;
   c.appendChild(buildMsg(msg,channel));
+  renderPinnedBanner(containerId);
   scrollBottom(containerId);
 }
 
@@ -1891,12 +2478,76 @@ function emitTyping(channel){
   clearTimeout(typingT);
   typingT=setTimeout(()=>socket.emit('stopTyping',{channel}),2000);
 }
+function toggleReaction(channel, messageId, emoji){
+  if(!ME) return;
+  socket.emit('toggleReaction',{channel,messageId,emoji});
+}
 </script>
 
 <script>
 // ═══════════════════════════════════════
 // LOGIN / LOGOUT
 // ═══════════════════════════════════════
+function setConnectionState(state, message){
+  const badge=document.getElementById('connBadge');
+  const banner=document.getElementById('connBanner');
+  if(badge){
+    badge.className='conn-badge '+state;
+    if(state==='connected'){ badge.innerHTML='<span class="dot"></span> Connected'; }
+    else if(state==='reconnecting'){ badge.innerHTML='<span class="dot"></span> Reconnecting…'; }
+    else if(state==='disconnected'){ badge.innerHTML='<span class="dot"></span> Offline'; }
+    else { badge.innerHTML='<span class="dot"></span> Connecting…'; }
+  }
+  if(banner){
+    banner.classList.toggle('show', !!message);
+    if(message){ banner.textContent=message; }
+    else { banner.textContent=''; }
+  }
+}
+
+function setLoginBusy(isBusy){
+  const btn=document.getElementById('loginBtn');
+  if(btn){
+    btn.disabled=isBusy;
+    btn.classList.toggle('is-busy', isBusy);
+    btn.textContent=isBusy ? 'Signing in…' : 'Sign In →';
+  }
+}
+
+function showAppLoading(message){
+  const loader=document.getElementById('appLoading');
+  const text=document.getElementById('loadingText');
+  if(loader) loader.classList.remove('hidden');
+  if(text && message) text.textContent=message;
+}
+
+function hideAppLoading(){
+  const loader=document.getElementById('appLoading');
+  if(loader) loader.classList.add('hidden');
+}
+
+showAppLoading('Connecting to Classmates Chat…');
+setConnectionState('connecting');
+
+socket.on('connect', ()=>{
+  setConnectionState('connected');
+  hideAppLoading();
+  if(!ME) showToast('Connected. You can sign in now.');
+});
+
+socket.on('disconnect', ()=>{
+  setConnectionState('disconnected', 'Connection lost. Reconnecting…');
+});
+
+socket.on('reconnecting', ()=>{
+  setConnectionState('reconnecting', 'Reconnecting…');
+});
+
+socket.on('reconnect', ()=>{
+  setConnectionState('connected');
+  showToast('Reconnected successfully.');
+});
+
 function doLogin(){
   const name=document.getElementById('nameSelect').value;
   const pass=document.getElementById('passInput').value;
@@ -1904,12 +2555,14 @@ function doLogin(){
   err.style.display='none';
   if(!name){ err.textContent='Please choose your name.'; err.style.display='block'; return; }
   if(!pass){ err.textContent='Please enter your password.'; err.style.display='block'; return; }
+  setLoginBusy(true);
   socket.emit('login',{name,password:pass});
 }
 document.getElementById('passInput').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
 socket.on('loginError', msg=>{
   const err=document.getElementById('loginErr');
+  setLoginBusy(false);
   err.textContent=msg; err.style.display='block';
 });
 
@@ -1920,13 +2573,29 @@ socket.on('loginSuccess', data=>{
   myGroups=data.groups||[];
   allStudents.forEach(s=>{ profileCache[s.name]=s.profile||{}; });
   profileCache[ME]=myProfile;
+  setLoginBusy(false);
+  setConnectionState('connected');
+  hideAppLoading();
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appScreen').style.display='flex';
+  loadDraftState();
+  restoreDrafts();
+  requestNotifications();
   updateCoinUI(myProfile.coins||0, myProfile.premium||false);
   buildDMList();
   buildGroupList();
   buildTransferRecipients();
   loadAIFavorites();
+  // show admin button if Petnan
+  if(data.isAdmin || ME === '✨ Petnan Fwangkwal'){
+    isAdmin=true;
+    const adminBtn=document.getElementById('sb-admin');
+    if(adminBtn) adminBtn.style.display='';
+    const announceInp=document.getElementById('announceInput');
+    if(announceInp) announceInp.style.display='';
+  }
+  // init AI welcome screen with personalised greeting
+  setTimeout(()=>showAIWelcomeScreen(), 100);
   showSection('general');
 });
 
@@ -1938,6 +2607,10 @@ function doLogout(){
   document.getElementById('nameSelect').value='';
   document.getElementById('loginErr').style.display='none';
   ['generalMsgs','aiMsgs','studyMsgs'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  clearUnreadBadge();
+  setLoginBusy(false);
+  setConnectionState('connected');
+  hideAppLoading();
   if(studyRunning) stopStudy();
 }
 
@@ -2028,6 +2701,7 @@ socket.on('generalHistory', msgs=>{
   const c=document.getElementById('generalMsgs');
   c.innerHTML='';
   msgs.forEach(m=>c.appendChild(buildMsg(m,'gen')));
+  renderPinnedBanner('generalMsgs');
   scrollBottom('generalMsgs');
 });
 
@@ -2035,7 +2709,9 @@ socket.on('generalMessage', msg=>{
   if(msg.premium) { if(!profileCache[msg.sender]) profileCache[msg.sender]={}; profileCache[msg.sender].premium=true; }
   appendMsg('generalMsgs',msg,'gen');
   if(msg.sender!==ME && !document.getElementById('section-general').classList.contains('active')){
+    bumpUnread();
     showToast(`💬 ${msg.sender}: ${(msg.text||'').substring(0,45)}`);
+    pushNotification('New general message', `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2155,9 +2831,11 @@ socket.on('dmHistory',({with:other,messages})=>{
   c.innerHTML='';
   if(!messages.length){
     c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:.83rem">No messages yet. Say hi! 👋</div>';
+    renderPinnedBanner('dmMsgs');
     return;
   }
   messages.forEach(m=>c.appendChild(buildMsg(m,'dm')));
+  renderPinnedBanner('dmMsgs');
   scrollBottom('dmMsgs');
 });
 
@@ -2172,7 +2850,9 @@ socket.on('dmMessage', msg=>{
     const badge=document.getElementById('dmb-'+msg.sender.replace(/\W/g,'-'));
     if(badge){ badge.style.display='flex'; badge.textContent=unread.dm[msg.sender]; }
     document.getElementById('sb-dm').classList.add('has-unread');
+    bumpUnread();
     showToast(`✉️ ${msg.sender}: ${(msg.text||'').substring(0,45)}`);
+    pushNotification('New DM', `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2258,9 +2938,11 @@ socket.on('groupHistory',({groupId,messages})=>{
   c.innerHTML='';
   if(!messages.length){
     c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3)">No messages yet. Start the conversation! 👋</div>';
+    renderPinnedBanner('groupMsgs');
     return;
   }
   messages.forEach(m=>c.appendChild(buildMsg(m,'grp')));
+  renderPinnedBanner('groupMsgs');
   scrollBottom('groupMsgs');
 });
 
@@ -2274,8 +2956,10 @@ socket.on('groupMessage', msg=>{
     const badge=document.getElementById('grpb-'+msg.groupId);
     if(badge){ badge.style.display='flex'; badge.textContent=unread.grp[msg.groupId]; }
     document.getElementById('sb-groups').classList.add('has-unread');
+    bumpUnread();
     const g=myGroups.find(x=>x.id===msg.groupId);
     showToast(`👥 ${g?g.name:'Group'}: ${msg.sender}: ${(msg.text||'').substring(0,35)}`);
+    pushNotification(`New group message in ${g?g.name:'Group'}`, `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2385,16 +3069,24 @@ function leaveGroup(){
 // ═══════════════════════════════════════
 // 5 GREEN AI CHAT
 // ═══════════════════════════════════════
+socket.on('messageReactionUpdated', ({channel,messageId,message})=>{
+  document.querySelectorAll(`[data-msg-id="${messageId}"]`).forEach(row=>{
+    const bubble = row.querySelector('.bubble');
+    if(!bubble) return;
+    const k = channel==='general' ? 'gen' : channel==='dm' ? 'dm' : channel==='group' ? 'grp' : 'ai';
+    const newRow = buildMsg(message, k);
+    row.replaceWith(newRow);
+  });
+});
+
 socket.on('aiMessage', msg=>{
-  // hide welcome screen on first message
-  const welcome=document.getElementById('aiWelcome');
-  if(welcome) welcome.remove();
+  // switch to chat view
+  showAIChatView();
   aiMessageTexts[msg.id] = msg.text || '';
   lastAIMessageId = msg.id;
   appendMsg('aiMsgs', msg, 'ai');
-  refreshAIMessagesFavorites();
   // also pipe to Study AI tab if it's open
-  if(document.getElementById('hw-tab-study').style.display!=='none'){
+  if(document.getElementById('hw-tab-study') && document.getElementById('hw-tab-study').style.display!=='none'){
     const sw=document.getElementById('studyWelcome');
     if(sw) sw.remove();
     appendMsg('studyMsgs', msg, 'ai');
@@ -2418,9 +3110,25 @@ function sendAI(){
   const text=inp.value.trim();
   const files=pendingFiles.ai.slice();
   if((!text && !files.length) || aiLocked) return;
+  _doSendAI(text, files);
+  inp.value=''; inp.style.height='auto';
+  clearPending('ai');
+}
 
+function sendAIFromCenter(){
+  const inp=document.getElementById('aiInputCenter');
+  const text=inp.value.trim();
+  const files=pendingFiles.ai.slice();
+  if((!text && !files.length) || aiLocked) return;
+  _doSendAI(text, files);
+  inp.value=''; inp.style.height='auto';
+  clearPending('ai');
+  // switch to chat view
+  showAIChatView();
+}
+
+function _doSendAI(text, files){
   if(files.length){
-    // Send each file as a separate AI message with optional text on the first
     files.forEach((att,i)=>{
       const msgText = i===0 ? (text || `Please analyse this ${att.fileType}: ${att.name}`) : `Also analyse this ${att.fileType}: ${att.name}`;
       socket.emit('aiMessage',{text: msgText, attachment: att});
@@ -2428,24 +3136,53 @@ function sendAI(){
   } else {
     socket.emit('aiMessage',{text});
   }
-  inp.value=''; inp.style.height='auto';
-  clearPending('ai');
+  showAIChatView();
+}
+
+function handleAICenterKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendAIFromCenter(); }
+}
+
+function syncAIInput(el){
+  autoGrow(el);
+  // also sync to bottom input
+  const inp=document.getElementById('aiInput');
+  if(inp) inp.value=el.value;
+}
+
+function showAIChatView(){
+  const ws=document.getElementById('aiWelcomeScreen');
+  const cv=document.getElementById('aiChatView');
+  if(ws) ws.style.display='none';
+  if(cv){ cv.style.display='flex'; }
+}
+
+function showAIWelcomeScreen(){
+  const ws=document.getElementById('aiWelcomeScreen');
+  const cv=document.getElementById('aiChatView');
+  if(ws){ ws.style.display=''; ws.style.flex='1'; }
+  if(cv) cv.style.display='none';
+  // update greeting with name
+  const gt=document.getElementById('aiGreetingText');
+  if(gt && ME){
+    const first = ME.replace('✨ ','').split(' ')[0];
+    gt.textContent = `What's your plan, ${first}?`;
+  }
 }
 
 function aiQuick(text){
   const inp=document.getElementById('aiInput');
-  inp.value=text;
-  sendAI();
+  if(inp) inp.value=text;
+  const cinp=document.getElementById('aiInputCenter');
+  if(cinp) cinp.value=text;
+  _doSendAI(text,[]);
   showSection('ai');
 }
 
 function clearAIChat(){
-  document.getElementById('aiMsgs').innerHTML=`
-    <div id="aiWelcome" style="text-align:center;padding:36px 20px;color:var(--text3);max-width:480px;margin:0 auto">
-      <div style="font-size:2.8rem;margin-bottom:12px">🤖</div>
-      <h3 style="color:var(--purple);margin-bottom:7px;font-size:1.05rem">Chat cleared! Ready to help.</h3>
-      <p style="font-size:.82rem;line-height:1.7;color:var(--text2)">Ask me anything about your studies!</p>
-    </div>`;
+  const msgs=document.getElementById('aiMsgs');
+  if(msgs) msgs.innerHTML='';
+  showAIWelcomeScreen();
 }
 
 // ═══════════════════════════════════════
@@ -3081,8 +3818,485 @@ function sendCallChat(){
 
 <script>
 // ═══════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════
+socket.on('leaderboard', data=>{
+  const list=document.getElementById('leaderboardList');
+  if(!list) return;
+  list.innerHTML='';
+  const medals=['🥇','🥈','🥉'];
+  data.forEach((s,i)=>{
+    const p=profileCache[s.name]||{};
+    const isMe=s.name===ME;
+    const div=document.createElement('div');
+    div.className='lb-item';
+    if(isMe) div.style.cssText='border-color:rgba(0,245,255,.35);background:rgba(0,245,255,.06)';
+    const avEl=document.createElement('div');
+    avEl.className='lb-av';
+    if(p.avatar){ const img=document.createElement('img'); img.src=p.avatar; avEl.appendChild(img); }
+    else{ avEl.textContent=initials(s.name); }
+    div.innerHTML=`
+      <div class="lb-rank">${medals[i]||'#'+(i+1)}</div>`;
+    div.appendChild(avEl);
+    const nameColor = s.tier==='premium'?'var(--neon-yellow)':s.tier==='gold'?'#f59e0b':s.tier==='silver'?'#94a3b8':s.tier==='pro'?'#60a5fa':'var(--text)';
+    div.innerHTML+=`
+      <div class="lb-info">
+        <div class="lb-name" style="color:${nameColor}">${esc(s.name)}${isMe?' <span style="font-size:.6rem;color:var(--neon-cyan)">(you)</span>':''}</div>
+        <div class="lb-sub">📖 ${s.studyMinutes}min studied · 🔥 ${s.streak}d streak</div>
+      </div>
+      <div class="lb-coins">${s.coins.toLocaleString()} 🪙</div>`;
+    list.appendChild(div);
+  });
+});
+
+// ═══════════════════════════════════════
+// ANNOUNCEMENTS
+// ═══════════════════════════════════════
+socket.on('announcements', list=>{
+  renderAnnouncements(list);
+  if(list.length) document.getElementById('sb-announce').classList.add('has-unread');
+});
+socket.on('newAnnouncement', ann=>{
+  prependAnnouncement(ann);
+  document.getElementById('sb-announce').classList.add('has-unread');
+  showToast(`📢 ${ann.postedBy}: ${(ann.text||'').substring(0,60)}`);
+  playNotifSound();
+});
+
+function renderAnnouncements(list){
+  const el=document.getElementById('announceList');
+  if(!el) return;
+  el.innerHTML='';
+  if(!list||!list.length){
+    el.innerHTML='<div style="text-align:center;color:var(--text3);padding:30px;font-size:.83rem">No announcements yet.</div>';
+    return;
+  }
+  list.forEach(a=>prependAnnouncement(a,false));
+}
+
+function prependAnnouncement(ann, prepend=true){
+  const el=document.getElementById('announceList');
+  if(!el) return;
+  const empty=el.querySelector('div[style*="text-align:center"]');
+  if(empty) empty.remove();
+  const div=document.createElement('div');
+  div.className='ann-item';
+  div.innerHTML=`<div class="ann-author">📢 ${esc(ann.postedBy)}</div>
+    <div class="ann-text">${esc(ann.text)}</div>
+    <div class="ann-time">${fmt(ann.timestamp)}</div>`;
+  if(prepend) el.prepend(div); else el.appendChild(div);
+}
+
+function postAnnouncement(){
+  const text=(document.getElementById('adminAnnText')||document.getElementById('announceText'))?.value?.trim();
+  if(!text){ showToast('Please write an announcement first.'); return; }
+  socket.emit('postAnnouncement',{text});
+  const ta1=document.getElementById('adminAnnText');
+  const ta2=document.getElementById('announceText');
+  if(ta1) ta1.value='';
+  if(ta2) ta2.value='';
+  showToast('📢 Announcement posted!');
+}
+
+// ═══════════════════════════════════════
+// DAILY LOGIN BONUS
+// ═══════════════════════════════════════
+socket.on('dailyBonus',({bonus,streak,total})=>{
+  document.getElementById('bonusAmount').textContent=`+${bonus} 🪙`;
+  document.getElementById('bonusStreak').textContent=`Login streak: ${streak} day${streak!==1?'s':''}${streak>=7?' 🔥 MAX STREAK!':streak>=3?' 🔥':''}`;
+  openModal('dailyBonusModal');
+  updateCoinUI(total, myProfile.premium||false, myProfile.tier||null);
+  showToast(`🎁 Daily bonus: +${bonus} coins!`,'coin-toast');
+});
+
+// ═══════════════════════════════════════
+// MESSAGE EDIT / DELETE
+// ═══════════════════════════════════════
+socket.on('messageEdited',({messageId,newText,editedAt})=>{
+  document.querySelectorAll(`[data-msg-id="${messageId}"]`).forEach(row=>{
+    const bubble=row.querySelector('.bubble');
+    if(bubble){
+      bubble.innerHTML=fmtText(newText)+'<span style="font-size:.6rem;color:var(--text3);margin-left:5px;font-style:italic">(edited)</span>';
+    }
+  });
+});
+socket.on('messageDeleted',({messageId})=>{
+  document.querySelectorAll(`[data-msg-id="${messageId}"]`).forEach(row=>{
+    const bubble=row.querySelector('.bubble');
+    if(bubble) bubble.innerHTML='<em style="color:var(--text3);font-size:.8rem">Message deleted</em>';
+    const acts=row.querySelector('.msg-acts');
+    if(acts) acts.remove();
+  });
+});
+
+function doEditMessage(messageId, channel, oldText, groupId){
+  const newText=prompt('Edit your message:', oldText);
+  if(!newText||newText===oldText) return;
+  socket.emit('editMessage',{messageId, newText, channel, groupId});
+}
+function doDeleteMessage(messageId, channel, groupId){
+  if(!confirm('Delete this message?')) return;
+  socket.emit('deleteMessage',{messageId, channel, groupId});
+}
+function doReportMessage(messageId, text, sender){
+  const reason=prompt('Why are you reporting this message?','Inappropriate content');
+  if(!reason) return;
+  socket.emit('reportMessage',{messageId, reason, messageText:text, messageSender:sender});
+}
+
+// ═══════════════════════════════════════
+// READ RECEIPTS
+// ═══════════════════════════════════════
+socket.on('readReceipt',({messageId,readBy})=>{
+  document.querySelectorAll(`[data-msg-id="${messageId}"].own`).forEach(row=>{
+    let tick=row.querySelector('.read-tick');
+    if(!tick){
+      tick=document.createElement('span');
+      tick.className='read-tick';
+      const meta=row.querySelector('.msg-meta');
+      if(meta) meta.appendChild(tick);
+    }
+    tick.textContent='✓✓ Seen';
+  });
+});
+
+// ═══════════════════════════════════════
+// POLLS
+// ═══════════════════════════════════════
+socket.on('pollCreated', poll=>{
+  // inject poll bubble into the correct message list
+  const containerId = poll.channel==='general'?'generalMsgs': poll.channel==='group'?'groupMsgs':null;
+  if(!containerId) return;
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  c.appendChild(buildPollEl(poll));
+  scrollBottom(containerId);
+});
+socket.on('pollUpdated', poll=>{
+  const existing=document.querySelector(`[data-poll-id="${poll.id}"]`);
+  if(existing) existing.replaceWith(buildPollEl(poll));
+});
+
+function buildPollEl(poll){
+  const wrap=document.createElement('div');
+  wrap.className='poll-wrap'; wrap.setAttribute('data-poll-id',poll.id);
+  const totalVotes=poll.options.reduce((s,o)=>s+o.votes.length,0);
+  const myVote=poll.options.findIndex(o=>o.votes.includes(ME));
+  const closedBadge=poll.closed?`<span class="poll-closed-badge">Closed</span>`:'';
+  wrap.innerHTML=`<div class="poll-q">📊 ${esc(poll.question)} ${closedBadge}</div>
+    <div class="poll-opts" id="popts-${poll.id}"></div>
+    <div class="poll-creator">by ${esc(poll.creator)} · ${totalVotes} vote${totalVotes!==1?'s':''}</div>
+    ${!poll.closed&&poll.creator===ME?`<button class="act-btn" style="margin-top:6px" onclick="socket.emit('closePoll',{pollId:'${poll.id}'})">🔒 Close poll</button>`:''}`;
+  const optsEl=wrap.querySelector(`#popts-${poll.id}`);
+  poll.options.forEach((opt,i)=>{
+    const pct=totalVotes>0?Math.round(opt.votes.length/totalVotes*100):0;
+    const voted=myVote===i;
+    const btn=document.createElement('button');
+    btn.className='poll-opt-btn'+(voted?' voted':'');
+    btn.disabled=poll.closed;
+    btn.innerHTML=`<span style="flex:1;font-size:.82rem;text-align:left">${esc(opt.text)}</span>
+      <div class="poll-bar"><div class="poll-bar-fill" style="width:${pct}%"></div></div>
+      <span class="poll-pct">${pct}%</span>`;
+    if(!poll.closed) btn.onclick=()=>socket.emit('votePoll',{pollId:poll.id,optionIndex:i});
+    optsEl.appendChild(btn);
+  });
+  return wrap;
+}
+
+function addPollOption(){
+  const wrap=document.getElementById('pollOptionsWrap');
+  if(!wrap||wrap.children.length>=6) return;
+  const inp=document.createElement('input');
+  inp.type='text'; inp.className='poll-opt';
+  inp.placeholder=`Option ${wrap.children.length+1}`;
+  wrap.appendChild(inp);
+}
+
+function submitPoll(){
+  const q=document.getElementById('pollQuestion')?.value?.trim();
+  const opts=Array.from(document.querySelectorAll('#pollOptionsWrap .poll-opt')).map(i=>i.value.trim()).filter(Boolean);
+  if(!q){ showToast('Please enter a question.'); return; }
+  if(opts.length<2){ showToast('Add at least 2 options.'); return; }
+  const channel=document.getElementById('section-groups').classList.contains('active')?'group':'general';
+  socket.emit('createPoll',{question:q,options:opts,channel,groupId:currentGroup||null});
+  closeModal('pollModal');
+  showToast('📊 Poll created!');
+}
+
+// ═══════════════════════════════════════
+// QUIZ MODE
+// ═══════════════════════════════════════
+let quizSession={questions:[],current:0,correct:0,answers:[]};
+let quizAILocked=false;
+
+function startQuiz(){
+  const subject=document.getElementById('quizSubject')?.value?.trim()||'General Knowledge';
+  const count=document.getElementById('quizCount')?.value||5;
+  if(quizAILocked) return;
+  quizAILocked=true;
+  const qc=document.getElementById('quizContent');
+  const qa=document.getElementById('quizQA');
+  qc.style.display='none';
+  qa.style.display='';
+  qa.innerHTML=`<div style="text-align:center;padding:20px;color:var(--text2)">
+    <div style="font-size:1.5rem;margin-bottom:8px;animation:bounce 1s infinite">🧠</div>
+    Generating ${count} ${subject} questions…</div>`;
+  const prompt=`Generate exactly ${count} multiple-choice quiz questions about "${subject}" for school students.
+Format each question EXACTLY like this (no extra text):
+Q: [question text]
+A) [option]
+B) [option]
+C) [option]
+D) [option]
+Answer: [A/B/C/D]
+---`;
+  socket.emit('aiMessage',{text:prompt});
+  socket.once('aiMessage',msg=>{
+    quizAILocked=false;
+    parseAndShowQuiz(msg.text||'', subject, count);
+  });
+}
+
+function parseAndShowQuiz(text, subject, count){
+  const qa=document.getElementById('quizQA');
+  if(!qa) return;
+  // Parse questions
+  const blocks=text.split('---').filter(b=>b.trim());
+  const questions=[];
+  blocks.forEach(block=>{
+    const qm=block.match(/Q:\s*(.+)/);
+    const opts=[];
+    ['A','B','C','D'].forEach(l=>{
+      const m=block.match(new RegExp(l+'\\)\\s*(.+)'));
+      if(m) opts.push({label:l,text:m[1].trim()});
+    });
+    const am=block.match(/Answer:\s*([ABCD])/);
+    if(qm&&opts.length>=2&&am) questions.push({q:qm[1].trim(),opts,answer:am[1]});
+  });
+  if(!questions.length){
+    qa.innerHTML=`<div style="text-align:center;color:var(--neon-pink);padding:16px">Couldn't parse questions. Try again!</div>
+      <div class="modal-actions"><button class="btn-primary" onclick="resetQuiz()">Try Again</button><button class="btn-ghost" onclick="closeModal('quizModal')">Close</button></div>`;
+    return;
+  }
+  quizSession={questions,current:0,correct:0,answers:[]};
+  showQuizQuestion();
+}
+
+function showQuizQuestion(){
+  const qa=document.getElementById('quizQA');
+  if(!qa) return;
+  const {questions,current}=quizSession;
+  if(current>=questions.length){ showQuizResults(); return; }
+  const q=questions[current];
+  qa.innerHTML=`<div style="font-size:.72rem;color:var(--text3);margin-bottom:8px">Question ${current+1} of ${questions.length}</div>
+    <div class="quiz-q">${esc(q.q)}</div>
+    <div class="quiz-opts">
+      ${q.opts.map(o=>`<button class="quiz-opt" onclick="answerQuiz('${o.label}')">${esc(o.label+') '+o.text)}</button>`).join('')}
+    </div>`;
+}
+
+function answerQuiz(label){
+  const {questions,current}=quizSession;
+  const q=questions[current];
+  const correct=label===q.answer;
+  if(correct) quizSession.correct++;
+  quizSession.answers.push({label,correct});
+  // highlight correct/wrong
+  const qa=document.getElementById('quizQA');
+  qa.querySelectorAll('.quiz-opt').forEach(btn=>{
+    const l=btn.textContent.trim()[0];
+    btn.disabled=true;
+    if(l===q.answer) btn.classList.add('correct');
+    else if(l===label&&!correct) btn.classList.add('wrong');
+  });
+  setTimeout(()=>{
+    quizSession.current++;
+    showQuizQuestion();
+  },900);
+}
+
+function showQuizResults(){
+  const qa=document.getElementById('quizQA');
+  const {correct,questions}=quizSession;
+  const pct=Math.round(correct/questions.length*100);
+  const grade=pct>=80?'🌟 Excellent!':pct>=60?'👍 Good job!':pct>=40?'📖 Keep studying!':'💪 More practice needed!';
+  socket.emit('quizComplete',{correct,total:questions.length});
+  qa.innerHTML=`<div class="quiz-score">
+    <div style="font-size:3rem;margin-bottom:8px">${pct>=80?'🏆':pct>=60?'😊':pct>=40?'📚':'😅'}</div>
+    <div style="font-size:1.3rem;font-weight:800;color:var(--neon-cyan)">${correct}/${questions.length}</div>
+    <div style="font-size:.9rem;color:var(--text2);margin:4px 0">${grade}</div>
+    <div style="font-size:.78rem;color:var(--neon-yellow);margin-top:6px">+${correct*5} 🪙 coins earned!</div>
+  </div>
+  <div class="modal-actions" style="margin-top:12px">
+    <button class="btn-primary" onclick="resetQuiz()">🔄 New Quiz</button>
+    <button class="btn-ghost" onclick="closeModal('quizModal')">Close</button>
+  </div>`;
+}
+
+function resetQuiz(){
+  const qc=document.getElementById('quizContent');
+  const qa=document.getElementById('quizQA');
+  if(qc){ qc.style.display=''; document.getElementById('quizSubject').value=''; }
+  if(qa) qa.style.display='none';
+  quizSession={questions:[],current:0,correct:0,answers:[]};
+}
+
+socket.on('quizReward',({reward,coins})=>{
+  if(reward>0){
+    myProfile.coins=coins;
+    updateCoinUI(coins,myProfile.premium||false,myProfile.tier||null);
+  }
+});
+
+// ═══════════════════════════════════════
+// HOMEWORK GRADING
+// ═══════════════════════════════════════
+socket.on('homeworkGraded',({hwId,studentName,grade,feedback})=>{
+  showToast(`📝 ${studentName} graded: ${grade}`);
+});
+socket.on('myGrade',({hwId,grade,feedback,gradedBy})=>{
+  showToast(`📝 Your homework was graded: ${grade}!`,'coin-toast');
+  openModal('gradeNotifModal')||showToast(`📝 Grade: ${grade} — ${feedback}`);
+});
+
+// ═══════════════════════════════════════
+// ADMIN PANEL
+// ═══════════════════════════════════════
+function populateAdminDropdowns(){
+  ['adminCoinStudent','adminPwStudent'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel||sel.children.length>1) return;
+    allStudents.forEach(s=>{
+      const opt=document.createElement('option');
+      opt.value=opt.textContent=s.name;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+socket.on('reportsList', reports=>{
+  const el=document.getElementById('adminReportsList');
+  if(!el) return;
+  el.innerHTML='';
+  if(!reports.length){ el.innerHTML='<div style="font-size:.77rem;color:var(--text3)">No open reports.</div>'; return; }
+  reports.forEach(r=>{
+    const div=document.createElement('div');
+    div.className='admin-report';
+    div.innerHTML=`<p><strong style="color:var(--neon-pink)">⚠️ ${esc(r.reportedBy)}</strong> reported <strong>${esc(r.messageSender)}</strong></p>
+      <p style="margin-bottom:3px">"${esc((r.messageText||'').substring(0,80))}"</p>
+      <p>Reason: ${esc(r.reason)}</p>
+      <span>${fmt(r.timestamp)}</span>
+      <button class="act-btn" style="margin-left:8px" onclick="socket.emit('resolveReport',{reportId:'${r.id}'})">✅ Resolve</button>`;
+    el.appendChild(div);
+  });
+});
+
+socket.on('adminActionDone',({message})=>{
+  const el=document.getElementById('adminActionMsg');
+  if(el){ el.textContent=message; el.style.display=''; setTimeout(()=>el.style.display='none',4000); }
+  showToast(message);
+});
+
+socket.on('adminAlert',({message})=>{ showToast(message); });
+
+function adminGiveCoins(){
+  const name=document.getElementById('adminCoinStudent')?.value;
+  const amt=parseInt(document.getElementById('adminCoinAmt')?.value)||0;
+  if(!name||!amt){ showToast('Choose a student and enter an amount.'); return; }
+  socket.emit('adminGiveCoins',{studentName:name,amount:amt});
+  document.getElementById('adminCoinAmt').value='';
+}
+
+function adminResetPw(){
+  const name=document.getElementById('adminPwStudent')?.value;
+  const pw=document.getElementById('adminNewPw')?.value?.trim();
+  if(!name||!pw){ showToast('Choose a student and enter a new password.'); return; }
+  socket.emit('adminResetPassword',{studentName:name,newPassword:pw});
+  document.getElementById('adminNewPw').value='';
+}
+
+// ═══════════════════════════════════════
+// THEME TOGGLE (dark/light)
+// ═══════════════════════════════════════
+function toggleTheme(){
+  lightMode=!lightMode;
+  document.body.classList.toggle('light-mode',lightMode);
+  const btn=document.getElementById('themeBtn');
+  if(btn) btn.textContent=lightMode?'🌙':'☀️';
+  localStorage.setItem('lightMode',lightMode);
+}
+// restore on load
+if(localStorage.getItem('lightMode')==='true'){ lightMode=true; document.body.classList.add('light-mode'); const b=document.getElementById('themeBtn'); if(b) b.textContent='🌙'; }
+
+// ═══════════════════════════════════════
+// NOTIFICATION SOUND
+// ═══════════════════════════════════════
+function playNotifSound(){
+  if(!soundEnabled) return;
+  const s=document.getElementById('notifSound');
+  if(!s) return;
+  s.currentTime=0;
+  s.play().catch(()=>{});
+}
+// play on new messages
+const _origShowToast=showToast;
+function showToast(msg,type=''){
+  _origShowToast(msg,type);
+}
+
+// Hook sound into incoming messages
+socket.on('dmMessage', msg=>{
+  if(msg.sender!==ME) playNotifSound();
+});
+socket.on('generalMessage', msg=>{
+  if(msg.sender!==ME && !document.getElementById('section-general').classList.contains('active')) playNotifSound();
+});
+
+// ═══════════════════════════════════════
+// RATE LIMIT
+// ═══════════════════════════════════════
+socket.on('rateLimited',({msg})=>{
+  showToast(msg,'rate-toast');
+});
+
+// ═══════════════════════════════════════
+// MARK MESSAGES AS READ
+// ═══════════════════════════════════════
+function markMessagesRead(containerId){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  c.querySelectorAll('.msg-row:not(.own)').forEach(row=>{
+    const id=row.getAttribute('data-msg-id');
+    if(id) socket.emit('markRead',{messageId:id});
+  });
+}
+// Call when opening DM
+const _origOpenDM=openDM;
+function openDM(name){
+  _origOpenDM(name);
+  setTimeout(()=>markMessagesRead('dmMsgs'),500);
+}
+
+</script>
+
+<script>
+// ═══════════════════════════════════════
 // INIT — close modals on overlay click
 // ═══════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const installBtn=document.getElementById('installBtn');
+  if(installBtn) installBtn.style.display='inline-flex';
+  showToast('📱 Install this app for a better mobile experience.');
+});
+window.addEventListener('appinstalled', ()=>{
+  const installBtn=document.getElementById('installBtn');
+  if(installBtn) installBtn.style.display='none';
+  showToast('✅ App installed.');
+});
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+window.addEventListener('visibilitychange', ()=>{ if(!document.hidden) clearUnreadBadge(); });
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   overlay.addEventListener('click', e=>{
     if(e.target===overlay) overlay.classList.remove('open');
@@ -3101,12 +4315,10 @@ document.addEventListener('keydown', e=>{
 // DISCONNECT / RECONNECT HANDLING
 // ═══════════════════════════════════════
 socket.on('disconnect',()=>{
-  showToast('⚠️ Error 404: Homework Not Found — Your internet signal just dropped out faster than your motivation on a Monday morning. Reconnecting before the teacher notices…');
+  showToast('⚠️ Connection lost. Reconnecting…');
 });
 socket.on('connect',()=>{
   if(ME){
-    // auto re-login on reconnect
-    const pass = ''; // can't re-auth without password on reconnect — just show toast
     showToast('🟢 Reconnected!');
   }
 });
