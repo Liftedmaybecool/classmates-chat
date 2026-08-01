@@ -5321,7 +5321,15 @@ window.addEventListener('appinstalled', ()=>{
   if(installBtn) installBtn.style.display='none';
   showToast('✅ App installed.');
 });
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    reg.update(); // force update on every load
+  }).catch(()=>{});
+  // Also clear old caches
+  navigator.serviceWorker.getRegistrations().then(registrations=>{
+    registrations.forEach(r=>r.unregister());
+  });
+}
 window.addEventListener('visibilitychange', ()=>{ if(!document.hidden) clearUnreadBadge(); });
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   overlay.addEventListener('click', e=>{
