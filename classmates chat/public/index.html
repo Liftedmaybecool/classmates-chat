@@ -2033,6 +2033,189 @@ body.light-mode{
 
               </div>
 
+              <!-- ── GAME-BASED STUDY TOOLS ── -->
+              <div class="powerup-section-label">🎮 Game-Based Study Tools</div>
+              <div class="powerup-grid">
+
+                <div class="pu-card" id="pu-flashcard">
+                  <div class="pu-icon">🃏</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Vocabulary Flashcard Builder</div>
+                    <div class="pu-desc">Scans a photo of a textbook page and generates a set of digital matching flashcards.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">1,200 🪙</div>
+                    <button class="pu-btn" id="pub-flashcard" onclick="buyPowerup('flashcard',1200)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-pop-quiz">
+                  <div class="pu-icon">🎯</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Reading Pop-Quiz</div>
+                    <div class="pu-desc">Reads an uploaded PDF article and creates a fun, interactive 5-question trivia game to test your memory.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">2,000 🪙</div>
+                    <button class="pu-btn" id="pub-pop-quiz" onclick="buyPowerup('pop-quiz',2000)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-spelling-bee">
+                  <div class="pu-icon">🐝</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Spelling Bee Training Mode</div>
+                    <div class="pu-desc">Looks at a vocabulary list and creates custom spelling challenges with hints, definition clues, and sentence examples.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">3,500 🪙</div>
+                    <button class="pu-btn" id="pub-spelling-bee" onclick="buyPowerup('spelling-bee',3500)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card pu-legendary" id="pu-jeopardy">
+                  <div class="pu-legendary-badge">👑 LEGENDARY</div>
+                  <div class="pu-icon">📺</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Jeopardy Review Board</div>
+                    <div class="pu-desc">Scans an entire study unit sheet and turns it into a full digital classroom Jeopardy game you can play.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price" style="color:var(--neon-yellow)">7,500 🪙</div>
+                    <button class="pu-btn pu-legendary-btn" id="pub-jeopardy" onclick="buyPowerup('jeopardy',7500)">Buy</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- ── CREATIVE & PRESENTATION ASSISTANTS ── -->
+              <div class="powerup-section-label">🎨 Creative & Presentation Assistants</div>
+              <div class="powerup-grid">
+
+                <div class="pu-card" id="pu-title-maker">
+                  <div class="pu-icon">✨</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Creative Title Maker</div>
+                    <div class="pu-desc">Looks at an essay topic or science experiment and suggests 10 catchier, cooler titles to impress the teacher.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">1,000 🪙</div>
+                    <button class="pu-btn" id="pub-title-maker" onclick="buyPowerup('title-maker',1000)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-slideshow">
+                  <div class="pu-icon">📊</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Slide Show Outline Creator</div>
+                    <div class="pu-desc">Reads a project prompt and builds a slide-by-slide plan showing exactly what text and pictures to put on each slide.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">2,500 🪙</div>
+                    <button class="pu-btn" id="pub-slideshow" onclick="buyPowerup('slideshow',2500)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-poster-script">
+                  <div class="pu-icon">🎤</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Poster Presentation Script</div>
+                    <div class="pu-desc">Scans a rough draft poster and writes a simple, short script for what to say out loud during presentations.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">4,000 🪙</div>
+                    <button class="pu-btn" id="pub-poster-script" onclick="buyPowerup('poster-script',4000)">Buy</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- ── AI BUDDY PERSONAS ── -->
+              <div class="powerup-section-label">🤖 AI Buddy Personas</div>
+              <div class="powerup-grid">
+
+                <div class="pu-card" id="pu-cheerleader">
+                  <div class="pu-icon">📣</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Encouraging Cheerleader</div>
+                    <div class="pu-desc">Changes the AI's personality to celebrate every correct answer and keep spirits high during frustrating homework.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">1,800 🪙</div>
+                    <button class="pu-btn" id="pub-cheerleader" onclick="buyPowerup('cheerleader',1800)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-time-traveler">
+                  <div class="pu-icon">⏳</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Time-Traveler Historian</div>
+                    <div class="pu-desc">Changes the AI into a historical figure from a specific time period to answer history questions firsthand.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">5,000 🪙</div>
+                    <button class="pu-btn" id="pub-time-traveler" onclick="buyPowerup('time-traveler',5000)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card" id="pu-curious-alien">
+                  <div class="pu-icon">👽</div>
+                  <div class="pu-info">
+                    <div class="pu-name">The Curious Alien</div>
+                    <div class="pu-desc">The AI pretends to know nothing about Earth — you teach the AI a topic to unlock points and deepen understanding.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">6,000 🪙</div>
+                    <button class="pu-btn" id="pub-curious-alien" onclick="buyPowerup('curious-alien',6000)">Buy</button>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- ── ADVANCED MASTERY POWERUPS ── -->
+              <div class="powerup-section-label">🏅 Advanced Mastery Powerups</div>
+              <div class="powerup-grid">
+
+                <div class="pu-card" id="pu-reading-slider">
+                  <div class="pu-icon">📖</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Reading Level Slider</div>
+                    <div class="pu-desc">Rewrites difficult text or complex research documents into an easier reading level to clarify tough topics.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price">4,500 🪙</div>
+                    <button class="pu-btn" id="pub-reading-slider" onclick="buyPowerup('reading-slider',4500)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card pu-legendary" id="pu-exam-predictor">
+                  <div class="pu-legendary-badge">👑 LEGENDARY</div>
+                  <div class="pu-icon">🔮</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Exam Prep Predictor</div>
+                    <div class="pu-desc">Looks at a syllabus, homework, and worksheets to predict the top 10 most likely questions on the real test.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price" style="color:var(--neon-yellow)">8,500 🪙</div>
+                    <button class="pu-btn pu-legendary-btn" id="pub-exam-predictor" onclick="buyPowerup('exam-predictor',8500)">Buy</button>
+                  </div>
+                </div>
+
+                <div class="pu-card pu-legendary" id="pu-study-dashboard">
+                  <div class="pu-legendary-badge">👑 LEGENDARY</div>
+                  <div class="pu-icon">📅</div>
+                  <div class="pu-info">
+                    <div class="pu-name">Study Time Dashboard</div>
+                    <div class="pu-desc">Analyzes your study habits, notes, and goals to generate an optimized personalized study calendar.</div>
+                  </div>
+                  <div class="pu-bottom">
+                    <div class="pu-price" style="color:var(--neon-yellow)">9,000 🪙</div>
+                    <button class="pu-btn pu-legendary-btn" id="pub-study-dashboard" onclick="buyPowerup('study-dashboard',9000)">Buy</button>
+                  </div>
+                </div>
+
+              </div>
+
               <!-- Active Power-Up indicator -->
               <div class="active-pu-bar" id="activePuBar" style="display:none">
                 <div class="active-pu-inner">
@@ -2942,7 +3125,8 @@ function showSection(name){
   if(name==='admin') populateAdminDropdowns();
   if(name==='ai'){
     const msgs=document.getElementById('aiMsgs');
-    if(!msgs || !msgs.children.length) showAIWelcomeScreen();
+    // Only show welcome if no messages AND no active send
+    if(!msgs || (!msgs.children.length && !aiLocked)) showAIWelcomeScreen();
     else showAIChatView();
   }
 }
@@ -3777,8 +3961,10 @@ function aiQuick(text){
   if(inp) inp.value=text;
   const cinp=document.getElementById('aiInputCenter');
   if(cinp) cinp.value=text;
-  _doSendAI(text,[]);
   showSection('ai');
+  // Switch to chat view immediately before sending
+  showAIChatView();
+  _doSendAI(text,[]);
 }
 
 function clearAIChat(){
@@ -4899,6 +5085,19 @@ const POWERUP_NAMES = {
   'book-source':     'Book Source Helper',
   'voice-summary':   'Voice Note Summarizer',
   'oops-fixer':      'Oops! Fixer Log',
+  'flashcard':       'Vocabulary Flashcard Builder',
+  'pop-quiz':        'Reading Pop-Quiz',
+  'spelling-bee':    'Spelling Bee Training Mode',
+  'jeopardy':        'Jeopardy Review Board',
+  'title-maker':     'Creative Title Maker',
+  'slideshow':       'Slide Show Outline Creator',
+  'poster-script':   'Poster Presentation Script',
+  'cheerleader':     'Encouraging Cheerleader',
+  'time-traveler':   'Time-Traveler Historian',
+  'curious-alien':   'The Curious Alien',
+  'reading-slider':  'Reading Level Slider',
+  'exam-predictor':  'Exam Prep Predictor',
+  'study-dashboard': 'Study Time Dashboard',
 };
 
 function buyPowerup(id, cost){
@@ -4960,7 +5159,15 @@ function updateActivePowerupUI(){
 }
 
 function getPuCost(id){
-  const costs={'note-cleaner':1500,'cheat-sheet':3500,'diagram-decoder':4000,'math-guide':6500,'lang-pal':2500,'hw-buddy':3000,'brainstorm':4500,'friendly-critic':5000,'book-source':1000,'voice-summary':5500,'oops-fixer':10000};
+  const costs={
+    'note-cleaner':1500,'cheat-sheet':3500,'diagram-decoder':4000,'math-guide':6500,
+    'lang-pal':2500,'hw-buddy':3000,'brainstorm':4500,'friendly-critic':5000,
+    'book-source':1000,'voice-summary':5500,'oops-fixer':10000,
+    'flashcard':1200,'pop-quiz':2000,'spelling-bee':3500,'jeopardy':7500,
+    'title-maker':1000,'slideshow':2500,'poster-script':4000,
+    'cheerleader':1800,'time-traveler':5000,'curious-alien':6000,
+    'reading-slider':4500,'exam-predictor':8500,'study-dashboard':9000,
+  };
   return costs[id]||9999;
 }
 
@@ -4977,6 +5184,8 @@ socket.on('powerupError', msg=>{ showToast(msg); });
 
 // Send AI message with active power-up
 function _doSendAI(text, files){
+  // Switch to chat view immediately
+  showAIChatView();
   if(files.length){
     files.forEach((att,i)=>{
       const msgText = i===0 ? (text || `Please analyse this ${att.fileType}: ${att.name}`) : `Also analyse this ${att.fileType}: ${att.name}`;
@@ -4987,7 +5196,6 @@ function _doSendAI(text, files){
   }
   // deactivate after use
   if(activePowerup){ activePowerup=null; updateActivePowerupUI(); }
-  showAIChatView();
 }
 
 // ═══════════════════════════════════════

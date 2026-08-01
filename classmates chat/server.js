@@ -87,6 +87,20 @@ app.use('/uploads', express.static(uploadsDir));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Serve Socket.io client
+app.use('/socket.io', express.static(path.join(__dirname, 'node_modules/socket.io/client-dist')));
+
+// Explicitly serve index.html with correct MIME type
+app.get('/', (req, res) => {
+  res.type('html');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Socket.io client script
+app.get('/socket.io/socket.io.js', (req, res) => {
+  res.sendFile(path.join(__dirname, 'node_modules/socket.io/client-dist/socket.io.js'));
+});
+
 // ── OpenRouter (primary AI — OpenAI-compatible) ────────────────────────────────
 const OPENROUTER_KEYS = [
   process.env.OPENROUTER_API_KEY,
@@ -696,6 +710,23 @@ function buildPowerupPrompt(activePowerup) {
     'book-source':     '\n\n[ACTIVE POWER-UP: Book Source Helper] You are now in Source Builder mode. When given a book title, article name, website or any publication details, build a correctly formatted "Sources Used / Bibliography" entry in both MLA and APA format. Explain what each part of the citation means.',
     'voice-summary':   '\n\n[ACTIVE POWER-UP: Voice Note Summarizer] You are now in Lesson Summarizer mode. When given a transcript, description, or notes from a teacher\'s lesson, extract exactly 5 key takeaways, formatted as: 🎯 Takeaway 1, 🎯 Takeaway 2, etc. Then add a "What to study" section with 3 suggested review questions.',
     'oops-fixer':      '\n\n[ACTIVE POWER-UP: Oops! Fixer Log 👑 LEGENDARY] You are now the legendary Oops! Fixer. When given a graded test or exam (photo or description), do ALL of the following: 1) List every incorrect answer and explain the CORRECT answer clearly. 2) Explain WHY the mistake likely happened. 3) Generate 3 custom practice questions for each mistake. 4) Create a personalised "weak spots" summary. This is the ultimate study recovery tool.',
+    // ── Game-Based Study Tools ────────────────────────────────────────────────
+    'flashcard':       '\n\n[ACTIVE POWER-UP: Vocabulary Flashcard Builder] You are now in Flashcard Builder mode. When given any text, page, or vocabulary list, generate a set of digital flashcards in this format:\n🃏 CARD 1\nFront: [word/term]\nBack: [definition + example sentence]\n---\nGenerate at least 10 cards. Make them fun, visual, and memorable with emojis.',
+    'pop-quiz':        '\n\n[ACTIVE POWER-UP: Reading Pop-Quiz] You are now in Pop-Quiz mode. When given any text, article, or document, create exactly 5 multiple-choice trivia questions about it. Format: Q1, Q2 etc with options A-D and reveal the answer with a fun explanation after each one.',
+    'spelling-bee':    '\n\n[ACTIVE POWER-UP: Spelling Bee Training Mode] You are now the Spelling Bee Trainer. When given a vocabulary list, create custom spelling challenges. For each word: give the definition, use it in a sentence, give a pronunciation hint, then reveal the correct spelling. Make it feel like a real Spelling Bee competition!',
+    'jeopardy':        '\n\n[ACTIVE POWER-UP: Jeopardy Review Board 👑 LEGENDARY] You are now the Jeopardy Host! When given any study material, create a full Jeopardy board with 5 categories and 5 questions each (values: 100, 200, 300, 400, 500 points). Format it clearly with category headers. Then play through it interactively if the student wants.',
+    // ── Creative & Presentation Assistants ───────────────────────────────────
+    'title-maker':     '\n\n[ACTIVE POWER-UP: Creative Title Maker] You are now the Title Genius. When given any essay topic, project, or experiment, generate exactly 10 creative, catchy, impressive title options. Range from professional to fun. Explain briefly why each title works. Help the student pick the best one.',
+    'slideshow':       '\n\n[ACTIVE POWER-UP: Slide Show Outline Creator] You are now the Slideshow Architect. When given any project prompt or topic, build a detailed slide-by-slide plan: Slide 1 (Title), Slide 2 (Introduction), etc. For each slide specify: title, 3 bullet points of text, and one image/visual suggestion.',
+    'poster-script':   '\n\n[ACTIVE POWER-UP: Poster Presentation Script] You are now the Presentation Coach. When shown a poster topic or draft, write a clear, simple 2-minute speaking script for the student. Break it into sections: Opening hook, Main points (one per poster section), Conclusion. Keep language natural and age-appropriate.',
+    // ── AI Buddy Personas ─────────────────────────────────────────────────────
+    'cheerleader':     '\n\n[ACTIVE POWER-UP: Encouraging Cheerleader 📣] You are now the BIGGEST CHEERLEADER in the world! Every response must start with massive encouragement. Use lots of emojis 🎉🌟💪🔥. Celebrate every small win. When they get something right, go WILD with celebration. When they struggle, be extra warm and patient. Your energy must be infectious and uplifting!',
+    'time-traveler':   '\n\n[ACTIVE POWER-UP: Time-Traveler Historian ⏳] You are now roleplaying as a historical figure or time traveler from whatever era the student is studying. Speak in character — use period-appropriate language (but keep it understandable). Answer history questions as if you LIVED through them. Make history feel alive and personal!',
+    'curious-alien':   '\n\n[ACTIVE POWER-UP: The Curious Alien 👽] You are ZRIX, an alien who just arrived on Earth and knows NOTHING about human science, maths, or subjects. You are fascinated but confused. The student must TEACH YOU everything. Ask lots of "But WHY?" and "How does that work?" questions. When they explain something correctly, reward them with "FASCINATING! +10 Earth Points! 🌍" This forces the student to really understand the material.',
+    // ── Advanced Mastery ──────────────────────────────────────────────────────
+    'reading-slider':  '\n\n[ACTIVE POWER-UP: Reading Level Slider] You are now the Reading Level Simplifier. When given any complex text, rewrite it in simple, clear language suitable for a 3rd-4th grade reading level. Use short sentences, simple words, and helpful analogies. Then offer to explain any specific part in even simpler terms.',
+    'exam-predictor':  '\n\n[ACTIVE POWER-UP: Exam Prep Predictor 🔮 LEGENDARY] You are now the Exam Oracle. When given a syllabus, notes, worksheets, or study material, analyze the content and predict the TOP 10 most likely exam questions. For each prediction: state the question, explain WHY it is likely to appear, and give a model answer. Be specific and accurate.',
+    'study-dashboard': '\n\n[ACTIVE POWER-UP: Study Time Dashboard 📅 LEGENDARY] You are now the Personal Study Coach. When given the student\'s subjects, upcoming tests, and available study time, generate a detailed personalized study calendar. Break each session into 25-minute Pomodoro blocks. Balance heavy subjects with lighter ones. Include break times and motivational checkpoints.',
   };
   return prompts[activePowerup] || '';
 }
@@ -1268,17 +1299,34 @@ io.on('connection', (socket) => {
     if (!row) return;
 
     const POWERUPS = {
-      'note-cleaner':   { name: 'Messy Note Cleaner',       cost: 1500  },
-      'cheat-sheet':    { name: 'Chapter Cheat-Sheet',       cost: 3500  },
-      'diagram-decoder':{ name: 'Picture & Diagram Decoder', cost: 4000  },
-      'math-guide':     { name: 'Math Step-by-Step Guide',   cost: 6500  },
-      'lang-pal':       { name: 'Language Practice Pal',     cost: 2500  },
-      'hw-buddy':       { name: 'Homework Calendar Buddy',   cost: 3000  },
-      'brainstorm':     { name: 'Brainstorming Partner',     cost: 4500  },
-      'friendly-critic':{ name: 'Friendly Critic',           cost: 5000  },
-      'book-source':    { name: 'Book Source Helper',        cost: 1000  },
-      'voice-summary':  { name: 'Voice Note Summarizer',     cost: 5500  },
-      'oops-fixer':     { name: 'Oops! Fixer Log',           cost: 10000 },
+      'note-cleaner':    { name: 'Messy Note Cleaner',          cost: 1500  },
+      'cheat-sheet':     { name: 'Chapter Cheat-Sheet',          cost: 3500  },
+      'diagram-decoder': { name: 'Picture & Diagram Decoder',    cost: 4000  },
+      'math-guide':      { name: 'Math Step-by-Step Guide',      cost: 6500  },
+      'lang-pal':        { name: 'Language Practice Pal',        cost: 2500  },
+      'hw-buddy':        { name: 'Homework Calendar Buddy',      cost: 3000  },
+      'brainstorm':      { name: 'Brainstorming Partner',        cost: 4500  },
+      'friendly-critic': { name: 'Friendly Critic',              cost: 5000  },
+      'book-source':     { name: 'Book Source Helper',           cost: 1000  },
+      'voice-summary':   { name: 'Voice Note Summarizer',        cost: 5500  },
+      'oops-fixer':      { name: 'Oops! Fixer Log',              cost: 10000 },
+      // Game-Based
+      'flashcard':       { name: 'Vocabulary Flashcard Builder', cost: 1200  },
+      'pop-quiz':        { name: 'Reading Pop-Quiz',             cost: 2000  },
+      'spelling-bee':    { name: 'Spelling Bee Training Mode',   cost: 3500  },
+      'jeopardy':        { name: 'Jeopardy Review Board',        cost: 7500  },
+      // Creative
+      'title-maker':     { name: 'Creative Title Maker',         cost: 1000  },
+      'slideshow':       { name: 'Slide Show Outline Creator',   cost: 2500  },
+      'poster-script':   { name: 'Poster Presentation Script',   cost: 4000  },
+      // Personas
+      'cheerleader':     { name: 'Encouraging Cheerleader',      cost: 1800  },
+      'time-traveler':   { name: 'Time-Traveler Historian',      cost: 5000  },
+      'curious-alien':   { name: 'The Curious Alien',            cost: 6000  },
+      // Advanced
+      'reading-slider':  { name: 'Reading Level Slider',         cost: 4500  },
+      'exam-predictor':  { name: 'Exam Prep Predictor',          cost: 8500  },
+      'study-dashboard': { name: 'Study Time Dashboard',         cost: 9000  },
     };
 
     const pu = POWERUPS[id];
@@ -1653,7 +1701,10 @@ app.get('/api/admin/students', (req, res) => {
 app.get('/api/health', (req, res) => res.json({ status: 'ok', students: STUDENTS.length }));
 
 // ── Serve frontend ─────────────────────────────────────────────────────────────
-app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('*', (req, res) => {
+  res.type('html');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
