@@ -87,20 +87,6 @@ app.use('/uploads', express.static(uploadsDir));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-// Serve Socket.io client
-app.use('/socket.io', express.static(path.join(__dirname, 'node_modules/socket.io/client-dist')));
-
-// Explicitly serve index.html with correct MIME type
-app.get('/', (req, res) => {
-  res.type('html');
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Socket.io client script
-app.get('/socket.io/socket.io.js', (req, res) => {
-  res.sendFile(path.join(__dirname, 'node_modules/socket.io/client-dist/socket.io.js'));
-});
-
 // ── OpenRouter (primary AI — OpenAI-compatible) ────────────────────────────────
 const OPENROUTER_KEYS = [
   process.env.OPENROUTER_API_KEY,
@@ -1703,7 +1689,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', students: STUDENTS
 // ── Serve frontend ─────────────────────────────────────────────────────────────
 app.get('*', (req, res) => {
   res.type('html');
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
